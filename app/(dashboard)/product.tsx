@@ -8,33 +8,46 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
+import { Ticket, MoreHorizontal } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { SelectProduct } from '@/lib/db';
-import { deleteProduct } from './actions';
+import { SelectEvent } from '@/lib/db';
+import { deleteEvent } from './actions';
 
-export function Product({ product }: { product: SelectProduct }) {
+export function Event({
+  event
+}: {
+  event: SelectEvent & { participantCount: number };
+}) {
   return (
-    <TableRow>
+    <TableRow className="text-center">
       <TableCell className="hidden sm:table-cell">
-        <Image
-          alt="Product image"
-          className="aspect-square rounded-md object-cover"
-          height="64"
-          src={product.imageUrl}
-          width="64"
-        />
+        {event.imageUrl ? (
+          <Image
+            alt="Event image"
+            className="aspect-square rounded-md object-cover"
+            height="64"
+            src={event.imageUrl}
+            width="64"
+          />
+        ) : (
+          <div className="flex h-16 w-16 items-center justify-center rounded-md border">
+            <Ticket className="h-8 w-8 text-gray-400" />
+          </div>
+        )}
       </TableCell>
-      <TableCell className="font-medium">{product.name}</TableCell>
+      <TableCell className="font-medium">{event.name}</TableCell>
       <TableCell>
         <Badge variant="outline" className="capitalize">
-          {product.status}
+          {event.status}
         </Badge>
       </TableCell>
-      <TableCell className="hidden md:table-cell">{`$${product.price}`}</TableCell>
-      <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
       <TableCell className="hidden md:table-cell">
-        {product.availableAt.toLocaleDateString("en-US")}
+        {event.eventDate
+          ? event.eventDate.toLocaleDateString('en-US')
+          : 'No date'}
+      </TableCell>
+      <TableCell className="hidden md:table-cell">
+        {event.participantCount}
       </TableCell>
       <TableCell>
         <DropdownMenu>
@@ -48,7 +61,7 @@ export function Product({ product }: { product: SelectProduct }) {
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem>Edit</DropdownMenuItem>
             <DropdownMenuItem>
-              <form action={deleteProduct}>
+              <form action={deleteEvent}>
                 <button type="submit">Delete</button>
               </form>
             </DropdownMenuItem>
