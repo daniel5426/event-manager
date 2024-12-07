@@ -13,8 +13,13 @@ export function SearchInput() {
   function searchAction(formData: FormData) {
     let value = formData.get('q') as string;
     let params = new URLSearchParams({ q: value });
+    
+    // Get current pathname to determine which route we're on
+    const pathname = window.location.pathname;
+    const searchPath = pathname === '/' ? '/' : pathname;
+    
     startTransition(() => {
-      router.replace(`/?${params.toString()}`);
+      router.replace(`${searchPath}?${params.toString()}`);
     });
   }
 

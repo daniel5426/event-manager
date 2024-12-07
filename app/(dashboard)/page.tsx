@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { File, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { EventsTable } from './products-table';
+import { EventsTable } from './events-table';
 import { getEventParticipantCount, getEvents } from '@/lib/db';
 
 export default async function EventsPage(

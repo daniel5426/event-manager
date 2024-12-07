@@ -15,27 +15,26 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { Event } from './product';
-import { SelectEvent } from '@/lib/db';
+import { Participant } from './participant';
+import { SelectParticipant } from '@/lib/db';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export function EventsTable({
-  events,
+export function ParticipantsTable({
+  participants,
   offset,
-  totalEvents
+  totalParticipants
 }: {
-  events: (SelectEvent & { participantCount: number })[];
+  participants: SelectParticipant[];
   offset: number;
-  totalEvents: number;
+  totalParticipants: number;
 }) {
   let router = useRouter();
-  let eventsPerPage = 5;
-  console.log(totalEvents);
-
+  let participantsPerPage = 5;
+    
   function prevPage() {
-    router.push(`/?offset=${Math.max(0, offset - eventsPerPage)}`, { scroll: false });
+    router.push(`/?offset=${Math.max(0, offset - participantsPerPage)}`, { scroll: false });
   }
 
   function nextPage() {
@@ -57,11 +56,11 @@ export function EventsTable({
               <TableHead className="hidden w-[100px] text-center sm:table-cell">
                 <span className="sr-only">Image</span>
               </TableHead>
-              <TableHead className="text-center">Name</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="hidden text-center md:table-cell">Date</TableHead>
+              <TableHead className="text-center">ID</TableHead>
+              <TableHead className="text-center">Arrived Time</TableHead>
+              <TableHead className="hidden text-center md:table-cell">Exited Time</TableHead>
               <TableHead className="hidden text-center md:table-cell">
-                Participants
+                Second ID
               </TableHead>
               <TableHead className="text-center">
                 <span className="sr-only">Actions</span>
@@ -69,8 +68,8 @@ export function EventsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {events.map((event) => (
-              <Event key={event.id} event={event} />
+            {participants.map((participant) => (
+              <Participant key={participant.id} participant={participant} />
             ))}
           </TableBody>
         </Table>
@@ -80,9 +79,9 @@ export function EventsTable({
           <div className="text-xs text-muted-foreground">
             Showing{' '}
             <strong>
-              {Math.max(0, Math.min(offset - eventsPerPage, totalEvents) + 1)}-{offset}
+              {Math.max(0, Math.min(offset - participantsPerPage, totalParticipants) + 1)}-{offset}
             </strong>{' '}
-            of <strong>{totalEvents}</strong> events
+            of <strong>{totalParticipants}</strong> participants
           </div>
           <div className="flex">
             <Button
@@ -90,7 +89,7 @@ export function EventsTable({
               variant="ghost"
               size="sm"
               type="submit"
-              disabled={offset <= eventsPerPage}
+              disabled={offset <= participantsPerPage}
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
               Prev
@@ -100,7 +99,7 @@ export function EventsTable({
               variant="ghost"
               size="sm"
               type="submit"
-              disabled={offset + eventsPerPage > totalEvents}
+              disabled={offset + participantsPerPage > totalParticipants}
             >
               Next
               <ChevronRight className="ml-2 h-4 w-4" />

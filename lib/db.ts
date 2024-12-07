@@ -12,6 +12,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { count, eq, ilike, and, isNull } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
+import { sql } from 'drizzle-orm';
 
 export const db = drizzle(neon(process.env.POSTGRES_URL!));
 
@@ -40,6 +41,9 @@ export const participants = pgTable('participants', {
 
 export type SelectEvent = typeof events.$inferSelect;
 export const insertEventSchema = createInsertSchema(events);
+
+export type SelectParticipant = typeof participants.$inferSelect;
+export const insertParticipantSchema = createInsertSchema(participants);
 
 export async function getEvents(
   search: string,
@@ -142,4 +146,53 @@ export async function getEventParticipantCount(
   
   const result = await query;
   return result[0].count;
+}
+
+export async function getParticipants(
+  eventId: number,
+  search: string,
+  offset: number
+): Promise<{
+  participants: SelectParticipant[];
+  newOffset: number | null;
+  totalParticipants: number;
+}> {
+  // Always search the full table, not per page
+  if (search) {
+    return {
+      participants: await db
+        .select()
+        .from(participants)
+        .where(and(
+          eq(participants.eventId, eventId),
+          sql`to_char(${participants.arrivedTime}, 'YYYY-MM-DD HH24:MI:SS') ILIKE ${`%${search}%`}`
+        ))
+        .limit(1000),
+      newOffset: null,
+      totalParticipants: 0
+    };
+  }
+
+  if (offset === null) {
+    return { participants: [], newOffset: null, totalParticipants: 0 };
+  }
+
+  let totalParticipants = await db.select({ count: count() }).from(participants);
+  let moreParticipants = await db
+    .select()
+    .from(participants)
+    .where(eq(participants.eventId, eventId))
+    .limit(5)
+    .offset(offset);
+  let newOffset = moreParticipants.length >= 5 ? offset + 5 : null;
+
+  return {
+    participants: moreParticipants,
+    newOffset,
+    totalParticipants: totalParticipants[0].count
+  };
+}
+
+export async function deleteParticipantById(id: number) {
+  await db.delete(participants).where(eq(participants.id, id));
 }
