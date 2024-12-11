@@ -3,68 +3,90 @@ import { File, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ParticipantsTable } from './participants-table';
 import { getParticipants } from '@/lib/db';
+import { ExportButton } from './export-button';
+import { useState } from 'react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { AddEventForm } from '../add-event-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AddParticipantForm } from './add-part-form';
+import { ParticipantsTabs } from './participants-tabs';
 
 export default async function ParticipantsPage({
   params,
   searchParams,
 }: {
   params: Promise<{ event_id: string }>;
-  searchParams: Promise<{ q: string; offset: string }>;
+  searchParams: Promise<{ q: string; offset: string; status?: string }>;
 }) {
   const eventId = (await params).event_id;
   const searchParamsResolved = await searchParams;
   const search = searchParamsResolved.q ?? '';
   const offset = searchParamsResolved.offset ?? 0;
+  const status = searchParamsResolved.status ?? 'all';
+  
   const { participants, newOffset, totalParticipants } = await getParticipants(
     Number(eventId),
     search,
-    Number(offset)
+    Number(offset),
+    status as 'arrived' | 'exited' | undefined
   );
 
   return (
-    <Tabs defaultValue="all">
+    <ParticipantsTabs defaultValue="all">
       <div className="flex items-center">
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="arrived">Still in the event</TabsTrigger>
+          <TabsTrigger value="arrived">Still in the event</TabsTrigger>
           <TabsTrigger value="exited">Exited the event</TabsTrigger>
         </TabsList>
         <div className="ml-auto flex items-center gap-2">
-          <Button size="sm" variant="outline" className="h-8 gap-1">
-            <File className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Export
-            </span>
-          </Button>
-          <Button size="sm" className="h-8 gap-1">
-            <PlusCircle className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Add Event
-            </span>
-          </Button>
+          <ExportButton eventId={Number(eventId)} />
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size="sm" className="h-8 gap-1">
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                  Add Participant
+                </span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className='w-full max-w-sm'>
+              <DialogHeader>
+                <DialogTitle>Add Participant</DialogTitle>
+              </DialogHeader>
+              <AddParticipantForm />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       <TabsContent value="all">
         <ParticipantsTable
           participants={participants}
-          offset={newOffset ?? 0}
+          offset={Number(offset) ?? 0}
+          newOffset={newOffset ?? 0}
           totalParticipants={totalParticipants}
+          status={undefined}
         />
       </TabsContent>
       <TabsContent value="arrived">
         <ParticipantsTable
-          participants={participants.filter(participant => participant.exitedTime === null)}
-          offset={newOffset ?? 0}
+          participants={participants}
+          offset={Number(offset) ?? 0}
+          newOffset={newOffset ?? 0}
           totalParticipants={totalParticipants}
+          status="arrived"
         />
       </TabsContent>
       <TabsContent value="exited">
         <ParticipantsTable
-          participants={participants.filter(participant => participant.exitedTime !== null)}
-          offset={newOffset ?? 0}
+          participants={participants}
+          offset={Number(offset) ?? 0}
+          newOffset={newOffset ?? 0}
           totalParticipants={totalParticipants}
+          status="exited"
         />
       </TabsContent>
-    </Tabs>
+    </ParticipantsTabs>
   );
 }

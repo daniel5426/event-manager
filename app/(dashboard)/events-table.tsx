@@ -24,22 +24,25 @@ import { Button } from '@/components/ui/button';
 export function EventsTable({
   events,
   offset,
-  totalEvents
+  newOffset,
+  totalEvents,
+  status
 }: {
-  events: (SelectEvent & { participantCount: number })[];
+  events: (SelectEvent & { totalParticipant: number; participantArrived: number })[];
   offset: number;
+  newOffset: number;
   totalEvents: number;
+  status: 'upcoming' | 'ongoing' | 'past' | undefined;
 }) {
   let router = useRouter();
   let eventsPerPage = 5;
-  console.log(totalEvents);
 
   function prevPage() {
-    router.push(`/?offset=${Math.max(0, offset - eventsPerPage)}`, { scroll: false });
+    router.push(`/?offset=${Math.max(0, newOffset - eventsPerPage)}&status=${status}`, { scroll: false });
   }
 
   function nextPage() {
-    router.push(`/?offset=${offset}`, { scroll: false });
+    router.push(`/?offset=${newOffset}&status=${status}`, { scroll: false });
   }
 
   return (
@@ -54,16 +57,20 @@ export function EventsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="hidden w-[100px] text-center sm:table-cell">
-                <span className="sr-only">Image</span>
+              <TableHead className="sm:table-cell">
+                Events
               </TableHead>
-              <TableHead className="text-center">Name</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="hidden text-center md:table-cell">Date</TableHead>
-              <TableHead className="hidden text-center md:table-cell">
-                Participants
+              <TableHead className=" md:table-cell">Name</TableHead>
+              <TableHead className="hidden  md:table-cell">Date</TableHead>
+              <TableHead className="">Status</TableHead>
+
+              <TableHead className="hidden  md:table-cell">
+                All participants
               </TableHead>
-              <TableHead className="text-center">
+              <TableHead className="hidden  md:table-cell">
+                Arrived participants
+              </TableHead>
+              <TableHead className="">
                 <span className="sr-only">Actions</span>
               </TableHead>
             </TableRow>
@@ -90,7 +97,7 @@ export function EventsTable({
               variant="ghost"
               size="sm"
               type="submit"
-              disabled={offset <= eventsPerPage}
+              disabled={offset  < eventsPerPage}
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
               Prev

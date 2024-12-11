@@ -9,13 +9,18 @@ export const metadata = {
 };
 
 export default function RootLayout({
-  children
+  children,
+  breadcrumb
 }: {
   children: React.ReactNode;
+  breadcrumb: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen w-full flex-col">{children}</body>
+      <body className="flex min-h-screen w-full flex-col">
+      <div className="left-[90px] top-[25px] absolute z-50">{breadcrumb}</div>
+        {children}
+      </body>
       <Analytics />
     </html>
   );

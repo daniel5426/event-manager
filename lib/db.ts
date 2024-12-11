@@ -7,34 +7,30 @@ import {
   text,
   timestamp,
   serial,
-  integer,
-  pgEnum
+  integer
 } from 'drizzle-orm/pg-core';
-import { count, eq, ilike, and, isNull } from 'drizzle-orm';
+import { count, eq, ilike, and, isNull, isNotNull } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { sql } from 'drizzle-orm';
+import { put } from '@vercel/blob';
 
 export const db = drizzle(neon(process.env.POSTGRES_URL!));
 
-export const eventStatusEnum = pgEnum('event_status', [
-  'scheduled',
-  'ongoing',
-  'completed',
-  'cancelled'
-]);
 
 export const events = pgTable('events', {
   id: serial('id').primaryKey(),
   imageUrl: text('image_url'),
   name: text('name').notNull(),
-  status: eventStatusEnum('status').notNull(),
   eventDate: timestamp('event_date')
 });
 
 export const participants = pgTable('participants', {
-  id: integer('id').primaryKey(),
+  id: serial('id').primaryKey(),
   eventId: integer('event_id').notNull().references(() => events.id),
-  secondId: integer('second_id'),
+  pn: integer('pn'),
+  nid: integer('nid'),
+  name: text('name'),
+  email: text('email'),
   arrivedTime: timestamp('arrived_time').notNull(),
   exitedTime: timestamp('exited_time')
 });
@@ -45,14 +41,20 @@ export const insertEventSchema = createInsertSchema(events);
 export type SelectParticipant = typeof participants.$inferSelect;
 export const insertParticipantSchema = createInsertSchema(participants);
 
+export async function getEvent(eventId: number): Promise<any> {
+  return await db.select().from(events).where(eq(events.id, eventId)).limit(1);
+}
+
 export async function getEvents(
   search: string,
-  offset: number
+  offset: number,
+  status?: 'upcoming' | 'ongoing' | 'past'
 ): Promise<{
-  events: SelectEvent[];
+  events: any[];
   newOffset: number | null;
   totalEvents: number;
 }> {
+  console.log("Status:", status);
   // Always search the full table, not per page
   if (search) {
     return {
@@ -70,8 +72,40 @@ export async function getEvents(
     return { events: [], newOffset: null, totalEvents: 0 };
   }
 
-  let totalEvents = await db.select({ count: count() }).from(events);
-  let moreEvents = await db.select().from(events).limit(5).offset(offset);
+  let query = db
+    .select({
+      id: events.id,
+      imageUrl: events.imageUrl,
+      name: events.name,
+      eventDate: sql`to_char(${events.eventDate}, 'YYYY-MM-DD')`
+    })
+    .from(events);
+
+  if (status) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (status === 'upcoming') {
+      query = query.where(sql`date(${events.eventDate}) > current_date`) as typeof query;
+    } else if (status === 'ongoing') {
+      query = query.where(sql`date(${events.eventDate}) = current_date`) as typeof query;
+    } else if (status === 'past') {
+      query = query.where(sql`date(${events.eventDate}) < current_date`) as typeof query;
+    }
+  }
+
+  const totalEvents = await db.select({ count: count() }).from(events).where(
+    status === 'upcoming' ? sql`date(${events.eventDate}) > current_date` :
+      status === 'ongoing' ? sql`date(${events.eventDate}) = current_date` :
+        status === 'past' ? sql`date(${events.eventDate}) < current_date` :
+          undefined
+  );
+  let moreEvents = await query
+    .orderBy(sql`${events.eventDate} DESC`)
+    .limit(5)
+    .offset(offset);
+
+
   let newOffset = moreEvents.length >= 5 ? offset + 5 : null;
 
   return {
@@ -81,24 +115,67 @@ export async function getEvents(
   };
 }
 
+export async function addEvent(name: string, imageUrl: File | null, eventDate: Date) {
+  let blob_url: { url: string } | null = null;
+  if (imageUrl) {
+    blob_url = await put(imageUrl.name, imageUrl, {
+      access: 'public',
+    });
+  }
+  const result = await db
+    .insert(events)
+    .values({
+      name,
+      imageUrl: blob_url?.url ?? null,
+      eventDate: eventDate
+    })
+    .returning();
+  return result[0];
+}
+
 export async function deleteEventById(id: number) {
+  // First delete all participants associated with this event
+  await db.delete(participants).where(eq(participants.eventId, id));
+  // Then delete the event
   await db.delete(events).where(eq(events.id, id));
 }
 
-export async function addParticipant(eventId: number, id: number) {
+export async function addParticipant(eventId: number, nid: number | null, pn: number | null, name: string | null = null, email: string | null = null) {
+  // First, check if participant with same pn exists
+  if (pn !== null) {
+    const existingParticipant = await db
+      .select()
+      .from(participants)
+      .where(
+        and(
+          eq(participants.eventId, eventId),
+          eq(participants.pn, pn)
+        )
+      )
+      .limit(1);
+
+    if (existingParticipant.length > 0) {
+      return existingParticipant[0];
+    }
+  }
+
+  // If no existing participant found, create new one
   const result = await db
     .insert(participants)
     .values({
       eventId,
-      id,
+      nid,
+      pn,
+      name,
+      email,
       arrivedTime: new Date()
     })
     .returning();
-  
+
   return result[0];
 }
 
-export async function registerParticipant(eventId: number, id: number) {
+export async function registerParticipant(eventId: number, nid: number, pn: number) {
   // First, try to find existing participant
   const existingParticipant = await db
     .select()
@@ -106,7 +183,7 @@ export async function registerParticipant(eventId: number, id: number) {
     .where(
       and(
         eq(participants.eventId, eventId),
-        eq(participants.id, id)
+        eq(participants.nid, nid)
       )
     )
     .limit(1);
@@ -120,38 +197,40 @@ export async function registerParticipant(eventId: number, id: number) {
       })
       .where(eq(participants.id, existingParticipant[0].id))
       .returning();
-    
+
     return result[0];
   } else {
     // Create new participant
-    return addParticipant(eventId, id);
+    return addParticipant(eventId, nid, pn);
   }
 }
 
 export async function getEventParticipantCount(
-  eventId: number, 
+  eventId: number,
   activeOnly: boolean = false
 ): Promise<number> {
   const query = db
     .select({ count: count() })
     .from(participants)
     .where(
-      activeOnly 
+      activeOnly
         ? and(
-            eq(participants.eventId, eventId),
-            isNull(participants.exitedTime)
-          )
+          eq(participants.eventId, eventId),
+          isNotNull(participants.arrivedTime)
+        )
         : eq(participants.eventId, eventId)
     );
-  
+
   const result = await query;
-  return result[0].count;
+  const participantArrived = result[0].count;
+  return participantArrived;
 }
 
 export async function getParticipants(
   eventId: number,
   search: string,
-  offset: number
+  offset: number,
+  status?: 'arrived' | 'exited'
 ): Promise<{
   participants: SelectParticipant[];
   newOffset: number | null;
@@ -163,10 +242,7 @@ export async function getParticipants(
       participants: await db
         .select()
         .from(participants)
-        .where(and(
-          eq(participants.eventId, eventId),
-          sql`to_char(${participants.arrivedTime}, 'YYYY-MM-DD HH24:MI:SS') ILIKE ${`%${search}%`}`
-        ))
+        .where(ilike(participants.name, `%${search}%`))
         .limit(1000),
       newOffset: null,
       totalParticipants: 0
@@ -177,13 +253,33 @@ export async function getParticipants(
     return { participants: [], newOffset: null, totalParticipants: 0 };
   }
 
-  let totalParticipants = await db.select({ count: count() }).from(participants);
-  let moreParticipants = await db
+  let query = db
     .select()
     .from(participants)
-    .where(eq(participants.eventId, eventId))
+    .where(
+      status === 'arrived' 
+        ? and(eq(participants.eventId, eventId), isNull(participants.exitedTime))
+        : status === 'exited'
+        ? and(eq(participants.eventId, eventId), isNotNull(participants.exitedTime))
+        : eq(participants.eventId, eventId)
+    );
+
+  const totalParticipants = await db
+    .select({ count: count() })
+    .from(participants)
+    .where(
+      and(
+        eq(participants.eventId, eventId),
+        status === 'arrived' ? isNull(participants.exitedTime) :
+        status === 'exited' ? isNotNull(participants.exitedTime) :
+        undefined
+      )
+    );
+
+  let moreParticipants = await query
     .limit(5)
     .offset(offset);
+
   let newOffset = moreParticipants.length >= 5 ? offset + 5 : null;
 
   return {

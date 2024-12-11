@@ -10,7 +10,7 @@ import {
 import { Ticket, MoreHorizontal, UserIcon } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { SelectParticipant } from '@/lib/db';
-import { deleteParticipant } from '../actions';
+import { deleteParticipant, updateParticipantExit } from '../actions';
 
 export function Participant({
   participant
@@ -18,28 +18,29 @@ export function Participant({
   participant: SelectParticipant ;
 }) {
   return (
-    <TableRow className="text-center">
+    <TableRow className="">
       <TableCell className="hidden sm:table-cell">
-        <div className="flex h-16 w-16 items-center justify-center rounded-md border">
-          <UserIcon className="h-8 w-8 text-gray-400" />
-        </div>
+        <UserIcon className="h-8 w-8 text-gray-400" />
       </TableCell>
-      <TableCell className="font-medium">{participant.id}</TableCell>
+      <TableCell className="font-medium">{participant.name ?? 'Unknown'}</TableCell>
+      <TableCell className="font-medium">{participant.email ?? 'Unknown'}</TableCell>
       <TableCell>
-        <Badge variant="outline" className="capitalize">
             {participant.arrivedTime
-            ? participant.arrivedTime.toLocaleDateString('en-US')
+            ? participant.arrivedTime.toTimeString().slice(0, 5)
             : 'No date'}
-        </Badge>
       </TableCell>
       <TableCell className="hidden md:table-cell">
         {participant.exitedTime
-          ? participant.exitedTime.toLocaleDateString('en-US')
-          : 'No date'}
+            ? participant.exitedTime.toTimeString().slice(0, 5)
+            : 'No date'}
       </TableCell>
       <TableCell className="hidden md:table-cell">
-        {participant.secondId}
+        {participant.pn}
       </TableCell>
+      <TableCell className="hidden md:table-cell">
+        {participant.nid}
+      </TableCell>
+
       <TableCell>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -50,7 +51,12 @@ export function Participant({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
+            <DropdownMenuItem>
+              <form action={updateParticipantExit}>
+                <input type="hidden" name="id" value={participant.id} />
+                <button type="submit">Exited</button>
+              </form>
+            </DropdownMenuItem>
             <DropdownMenuItem>
               <form action={deleteParticipant}>
                 <input type="hidden" name="id" value={participant.id} />
