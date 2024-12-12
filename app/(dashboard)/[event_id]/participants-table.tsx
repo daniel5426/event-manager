@@ -48,11 +48,51 @@ export function ParticipantsTable({
   let participantsPerPage = 10;
   const [idNumber, setIdNumber] = useState("");
   const [isCardReading, setIsCardReading] = useState(false);
-  const ID_LENGTH = 38; // Assuming your ID number is 9 digits
+  const ID_LENGTH = 37; // Assuming your ID number is 9 digits
   const { width, height } = useWindowSize();
   const [showWelcome, setShowWelcome] = useState(false);
   const [welcomeName, setWelcomeName] = useState('');
   const [messageType, setMessageType] = useState<'welcome' | 'goodbye' | 'detected'>('welcome');
+  
+  useEffect( () => {
+    const saveId = async () => {
+      console.log("Setting idNumber to 8608009168698971754288501332690221272");
+      console.log(idNumber.length);
+
+
+    if (idNumber.length === ID_LENGTH) {
+      const finalId = idNumber;
+      navigator.clipboard.writeText(finalId);
+      const numericId = finalId.replace(/[^0-9]/g, '')
+      const part1 = numericId.slice(0, 6);    // First 6 numbers
+      const pn = numericId.slice(6, 13);    // Next 7
+      const part3 = numericId.slice(13, 25);   // Next 12
+      const nid = numericId.slice(25, 34);  // Last 9
+      
+      // Check participant status before registration
+      const status = await checkParticipantStatusAction(Number(params.event_id), Number(pn));
+      
+      if (status.status === 'new') {
+        setMessageType('welcome');
+      } else if (status.status === 'active') {
+        setMessageType('goodbye');
+      } else {
+        setMessageType('detected');
+      }
+
+      setWelcomeName(status.name ?? pn);
+      setShowWelcome(true);
+      setTimeout(() => setShowWelcome(false), 5000);
+
+      await registerParticipantAction(Number(params.event_id), Number(nid), Number(pn));
+      router.refresh();
+      setIdNumber("");
+      setIsCardReading(false);
+    }}
+    saveId();
+    
+}, [idNumber]);
+
 
   useEffect(() => {
     const handleKeydown = async (e: any) => {
@@ -60,53 +100,22 @@ export function ParticipantsTable({
         setIsCardReading(true);
         setIdNumber("");
       }
+      if (e.key === '!') {
+        setIdNumber("8608009168698971754288501332690221272");
+      }
+
 
       // Add digits to idNumber
-      if (/^\d$/.test(e.key)) {
+      if (/^\d$/.test(e.key) && false) {
         setIdNumber((prev) => prev + e.key);
       }
-
       // If ID number length is reached, copy to clipboard
-      if (idNumber.length + 1 >= ID_LENGTH) {
-        const finalId = idNumber + e.key;
-        navigator.clipboard.writeText(finalId);
-        const numericId = finalId.replace(/[^0-9]/g, '')
-        console.log("numericId:", numericId);
-        const part1 = numericId.slice(0, 6);    // First 6 numbers
-        const pn = numericId.slice(6, 13);    // Next 7
-        const part3 = numericId.slice(13, 25);   // Next 12
-        const nid = numericId.slice(25, 34);  // Last 9
-        
-        console.log("ID parts:", { part1, pn, part3, nid });
-
-        console.log("ID copied to clipboard------:", params.event_id, Number(numericId));
-
-        // Check participant status before registration
-        const status = await checkParticipantStatusAction(Number(params.event_id), Number(pn));
-        
-        if (status === 'new') {
-          setMessageType('welcome');
-        } else if (status === 'active') {
-          setMessageType('goodbye');
-        } else {
-          setMessageType('detected');
-        }
-
-        setWelcomeName(pn);
-        setShowWelcome(true);
-        setTimeout(() => setShowWelcome(false), 5000);
-
-        await registerParticipantAction(Number(params.event_id), Number(nid), Number(pn));
-        router.refresh();
-        setIdNumber("");
-        setIsCardReading(false);
-      }
     };
 
     window.addEventListener("keydown", handleKeydown);
 
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [idNumber, isCardReading]);
+  }, [isCardReading]);
 
 
   function prevPage() {

@@ -141,24 +141,6 @@ export async function deleteEventById(id: number) {
 }
 
 export async function addParticipant(eventId: number, nid: number | null, pn: number | null, name: string | null = null, email: string | null = null) {
-  // First, check if participant with same pn exists
-  if (pn !== null) {
-    const existingParticipant = await db
-      .select()
-      .from(participants)
-      .where(
-        and(
-          eq(participants.eventId, eventId),
-          eq(participants.pn, pn)
-        )
-      )
-      .limit(1);
-
-    if (existingParticipant.length > 0) {
-      return existingParticipant[0];
-    }
-  }
-
   // If no existing participant found, create new one
   const result = await db
     .insert(participants)
@@ -168,7 +150,8 @@ export async function addParticipant(eventId: number, nid: number | null, pn: nu
       pn,
       name,
       email,
-      arrivedTime: new Date()
+      arrivedTime: new Date(),
+      exitedTime: null
     })
     .returning();
 
@@ -192,6 +175,7 @@ export async function registerParticipant(eventId: number, nid: number, pn: numb
     .limit(1);
 
   if (existingParticipant.length > 0 && existingParticipant[0].arrivedTime !== null) {
+    console.log("Updating exitedTime for existing participant");
     // Update existing participant's exitedTime
     const result = await db
       .update(participants)
@@ -203,6 +187,7 @@ export async function registerParticipant(eventId: number, nid: number, pn: numb
 
     return result[0];
   } else if (existingParticipant.length > 0 && existingParticipant[0].arrivedTime === null) {
+    console.log("Updating arrivedTime for existing participant");
     // Update existing participant's arrivedTime
     const result = await db
       .update(participants)
@@ -213,6 +198,7 @@ export async function registerParticipant(eventId: number, nid: number, pn: numb
       .returning();
     return result[0];
   } else {
+    console.log("Creating new participant");
     // Create new participant
     return addParticipant(eventId, nid, pn);
   }
@@ -282,9 +268,9 @@ export async function getParticipants(
     .from(participants)
     .where(
       status === 'arrived' 
-        ? and(eq(participants.eventId, eventId), isNull(participants.exitedTime))
+        ? and(eq(participants.eventId, eventId), isNull(participants.exitedTime), isNotNull(participants.arrivedTime))
         : status === 'exited'
-        ? and(eq(participants.eventId, eventId), isNotNull(participants.exitedTime))
+        ? and(eq(participants.eventId, eventId), isNotNull(participants.exitedTime), isNotNull(participants.arrivedTime))
         : eq(participants.eventId, eventId)
     );
 
@@ -317,7 +303,7 @@ export async function deleteParticipantById(id: number) {
   await db.delete(participants).where(eq(participants.id, id));
 }
 
-export async function checkParticipantStatus(eventId: number, pn: number): Promise<'new' | 'active' | 'exited'> {
+export async function checkParticipantStatus(eventId: number, pn: number): Promise<{status: 'new' | 'active' | 'exited', name: string | null}> {
   const existingParticipant = await db
     .select()
     .from(participants)
@@ -328,12 +314,17 @@ export async function checkParticipantStatus(eventId: number, pn: number): Promi
       )
     )
     .limit(1);
-
+  let status: 'new' | 'active' | 'exited' = 'new';
+  let name = null;
   if (existingParticipant.length === 0 || existingParticipant[0].arrivedTime === null) {
-    return 'new';
+    status = 'new';
   } else if (existingParticipant[0].exitedTime === null) {
-    return 'active';
+    status = 'active';
   } else {
-    return 'exited';
+    status = 'exited';
   }
+  if (existingParticipant.length > 0) {
+    name = existingParticipant[0].name;
+  }
+  return {status, name};
 }
