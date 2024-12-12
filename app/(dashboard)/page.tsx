@@ -34,17 +34,18 @@ export default async function EventsPage(
   );
 
   return (
-    <EventsTabs defaultValue="all">
+    <EventsTabs defaultValue="all" >
       <div className="flex items-center">
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="ongoing">Ongoing</TabsTrigger>
-          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-          <TabsTrigger value="past">Past</TabsTrigger>
-        </TabsList>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="mr-auto flex items-center gap-2">
           <AddEventForm />
         </div>
+        <TabsList>
+          <TabsTrigger value="all">הכל</TabsTrigger>
+          <TabsTrigger value="ongoing">מתקיים כעת</TabsTrigger>
+          <TabsTrigger value="upcoming">קרוב</TabsTrigger>
+          <TabsTrigger value="past">עבר</TabsTrigger>
+        </TabsList>
+
       </div>
       <TabsContent value="all">
         <EventsTable

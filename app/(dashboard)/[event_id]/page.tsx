@@ -35,30 +35,39 @@ export default async function ParticipantsPage({
   return (
     <ParticipantsTabs defaultValue="all">
       <div className="flex items-center">
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="arrived">Still in the event</TabsTrigger>
-          <TabsTrigger value="exited">Exited the event</TabsTrigger>
-        </TabsList>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="mr-auto flex items-center gap-2 shrink-0">
           <ExportButton eventId={Number(eventId)} />
           <Dialog>
             <DialogTrigger asChild>
               <Button size="sm" className="h-8 gap-1">
                 <PlusCircle className="h-3.5 w-3.5" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  Add Participant
+                  הוסף משתתף
                 </span>
               </Button>
             </DialogTrigger>
             <DialogContent className='w-full max-w-sm'>
               <DialogHeader>
-                <DialogTitle>Add Participant</DialogTitle>
+                <DialogTitle>הוסף משתתף</DialogTitle>
               </DialogHeader>
               <AddParticipantForm />
             </DialogContent>
           </Dialog>
         </div>
+        <div className="overflow-x-auto">
+          <TabsList className="w-fit">
+            <TabsTrigger value="all" className="text-sm px-2 sm:px-4">הכל</TabsTrigger>
+            <TabsTrigger value="arrived" className="text-sm px-2 sm:px-4">
+              <span className="hidden sm:inline">עדיין באירוע</span>
+              <span className="sm:hidden">נוכח</span>
+            </TabsTrigger>
+            <TabsTrigger value="exited" className="text-sm px-2 sm:px-4">
+              <span className="hidden sm:inline">יצא מהאירוע</span>
+              <span className="sm:hidden">יצא</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
       </div>
       <TabsContent value="all">
         <ParticipantsTable

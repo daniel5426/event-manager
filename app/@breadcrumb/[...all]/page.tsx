@@ -15,8 +15,11 @@ export default function BreadcrumbSlot({
 	const breadcrumbItems: ReactElement[] = [];
 	let breadcrumbPage: ReactElement = <></>;
 	for (let i = 0; i < params.all.length; i++) {
-		const route = params.all[i];
+		let route = params.all[i];
 		const href = `/${params.all.at(0)}/${route}`;
+		if (route === 'login') {
+			route = 'חיבור';
+		}
 		console.log("route", route);
 		if (i === params.all.length - 1) {
 			breadcrumbPage = (
@@ -41,10 +44,10 @@ export default function BreadcrumbSlot({
 		<Breadcrumb>
 			<BreadcrumbList>
 				<BreadcrumbItem>
-					<BreadcrumbLink href="/">Home</BreadcrumbLink>
+					<BreadcrumbLink href="/">בית</BreadcrumbLink>
 				</BreadcrumbItem>
 				{breadcrumbItems}
-				<BreadcrumbSeparator />
+                <BreadcrumbSeparator className="rotate-180" />
 				{breadcrumbPage}
 			</BreadcrumbList>
 		</Breadcrumb>

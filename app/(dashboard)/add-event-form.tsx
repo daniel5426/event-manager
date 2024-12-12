@@ -51,13 +51,13 @@ export function AddEventForm() {
       <Button size="sm" className="h-8 gap-1">
         <PlusCircle className="h-3.5 w-3.5" />
         <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-          Add Event
+          הוסף אירוע
         </span>
       </Button>
     </DialogTrigger>
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Add New Event</DialogTitle>
+        <DialogTitle>הוספת אירוע חדש</DialogTitle>
       </DialogHeader>
 
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -93,7 +93,7 @@ export function AddEventForm() {
                 <div className="h-16 w-16 flex items-center justify-center">
                   <PartyPopper className="h-20 w-20 text-gray-400" />
                 </div>
-                <span className="text-md mt-2">Upload an image</span>
+                <span className="text-md mt-2">העלה תמונה</span>
               </div>
             </div>
           )}
@@ -102,7 +102,7 @@ export function AddEventForm() {
         {/* Right side - Name, Date, and Excel inputs */}
         <div className="flex-1 space-y-4">
           <div>
-            <Label htmlFor="name">Event Name</Label>
+            <Label htmlFor="name">שם האירוע</Label>
             <Input
               id="name"
               value={name}
@@ -111,7 +111,7 @@ export function AddEventForm() {
             />
           </div>
           <div>
-            <Label htmlFor="date">Event Date</Label>
+            <Label htmlFor="date">תאריך האירוע</Label>
             <Input
               id="date"
               type="date"
@@ -121,7 +121,7 @@ export function AddEventForm() {
             />
           </div>
           <div>
-            <Label htmlFor="participants">Participants List (Excel)</Label>
+            <Label htmlFor="participants">רשימת משתתפים (אקסל)</Label>
             <Input
               id="participants"
               type="file"
@@ -131,13 +131,13 @@ export function AddEventForm() {
             />
             {participantsFile && (
               <p className="text-sm text-muted-foreground mt-1">
-                Selected file: {participantsFile.name}
+                קובץ נבחר: {participantsFile.name}
               </p>
             )}
           </div>
         </div>
       </div>
-      <Button type="submit" className="w-full">Save Event</Button>
+      <Button type="submit" className="w-full">שמור אירוע</Button>
     </form>
     </DialogContent>
     </Dialog>

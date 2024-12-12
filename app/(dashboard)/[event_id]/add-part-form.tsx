@@ -39,7 +39,7 @@ export function AddParticipantForm() {
     <form onSubmit={handleSubmit} className="space-y-8">
         <div className="flex-1 space-y-4">
           <div>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">שם</Label>
             <Input
               id="name"
               value={name}
@@ -47,7 +47,7 @@ export function AddParticipantForm() {
             />
           </div>
           <div>
-            <Label htmlFor="pn">PN</Label>
+            <Label htmlFor="pn">מספר אישי</Label>
             <Input
               id="pn"
               type="number"
@@ -57,7 +57,7 @@ export function AddParticipantForm() {
             />
           </div>
           <div>
-            <Label htmlFor="nid">NID</Label>
+            <Label htmlFor="nid">תעודת זהות</Label>
             <Input
               id="nid"
               type="number"
@@ -66,7 +66,7 @@ export function AddParticipantForm() {
             />
           </div>
           <div>
-            <Label htmlFor="name">Email</Label>
+            <Label htmlFor="name">דוא״ל</Label>
             <Input
               id="email"
               value={email}
@@ -74,7 +74,7 @@ export function AddParticipantForm() {
             />
           </div>
         </div>
-      <Button type="submit" className="w-full">Add Participant</Button>
+      <Button type="submit" className="w-full">הוסף משתתף</Button>
     </form>
   );
 }

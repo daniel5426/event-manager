@@ -21,11 +21,11 @@ export function Event({
   event: SelectEvent & { totalParticipant: number, participantArrived: number };
 }) {
   return (
-    <TableRow className="">
-      <TableCell className="hidden sm:table-cell">
+    <TableRow className="" dir='rtl'>
+      <TableCell className="hidden sm:table-cell  object-right">
         {event.imageUrl ? (
           <Image
-            alt="Event image"
+            alt="תמונת אירוע"
             className="aspect-square rounded-xl object-cover"
             height="64"
             src={event.imageUrl}
@@ -37,44 +37,55 @@ export function Event({
           </div>
         )}
       </TableCell>
-      <TableCell className="font-medium ">
+      <TableCell className="font-medium text-right">
         <Link href={`/${event.id}`} className="hover:underline">
           {event.name}
         </Link>
       </TableCell>
-      <TableCell className="hidden md:table-cell ">
+      <TableCell className="hidden md:table-cell text-right">
         {event.eventDate
           ? new Date(event.eventDate).toDateString()
-          : 'No date'}
+          : 'אין תאריך'}
       </TableCell>
-      <TableCell className="">
-        <Badge variant="outline" className="capitalize">
+      <TableCell className="text-right">
+        <Badge 
+          variant={
+            event.eventDate
+              ? new Date().setHours(0,0,0,0) === new Date(event.eventDate).setHours(0,0,0,0)
+                ? 'destructive'    // Blue for ongoing events
+                : new Date().setHours(0,0,0,0) > new Date(event.eventDate).setHours(0,0,0,0)
+                  ? 'secondary'  // Gray for past events
+                  : 'default'    // Changed from 'success' to 'default' for future events
+              : 'outline'        // Default outline for planned events
+          } 
+          className="capitalize"
+        >
           {event.eventDate
             ? new Date().setHours(0,0,0,0) === new Date(event.eventDate).setHours(0,0,0,0)
-              ? 'ongoing'
+              ? 'מתקיים'
               : new Date().setHours(0,0,0,0) > new Date(event.eventDate).setHours(0,0,0,0)
-                ? 'past'
-                : 'upcoming'
-            : 'scheduled'}
+                ? 'עבר'
+                : 'עתידי'
+            : 'מתוכנן'}
         </Badge>
       </TableCell>
 
-      <TableCell className="hidden md:table-cell ">
+      <TableCell className="hidden md:table-cell text-right">
         <span className="text-center px-10 text-md">{event.totalParticipant}</span>
       </TableCell>
-      <TableCell className="hidden md:table-cell ">
-        <span className=" px-14 text-md">{event.participantArrived}</span>
+      <TableCell className="hidden md:table-cell text-right">
+        <span className="px-14 text-md">{event.participantArrived}</span>
       </TableCell>
-      <TableCell className="">
+      <TableCell className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button aria-haspopup="true" size="icon" variant="ghost">
               <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Toggle menu</span>
+              <span className="sr-only">פתח תפריט</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent align="start">
+            <DropdownMenuLabel>פעו��ות</DropdownMenuLabel>
             <DropdownMenuItem asChild>
               <button
                 className="w-full"
@@ -89,13 +100,13 @@ export function Event({
                   window.URL.revokeObjectURL(url);
                 }}
               >
-                Export
+                ייצוא
               </button>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <form action={deleteEvent}>
                 <input type="hidden" name="id" value={event.id} />
-                <button type="submit">Delete</button>
+                <button type="submit">מחיקה</button>
               </form>
             </DropdownMenuItem>
           </DropdownMenuContent>

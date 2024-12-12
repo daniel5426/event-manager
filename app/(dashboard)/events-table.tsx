@@ -38,40 +38,39 @@ export function EventsTable({
   let eventsPerPage = 5;
 
   function prevPage() {
-    router.push(`/?offset=${Math.max(0, newOffset - eventsPerPage)}&status=${status}`, { scroll: false });
+    router.push(`/?offset=${Math.max(0, offset - eventsPerPage)}&status=${status}`, { scroll: false });
   }
 
   function nextPage() {
-    router.push(`/?offset=${newOffset}&status=${status}`, { scroll: false });
+    router.push(`/?offset=${offset + eventsPerPage}&status=${status}`, { scroll: false });
   }
 
   return (
-    <Card>
+    <Card dir='rtl'>
       <CardHeader>
-        <CardTitle>Events</CardTitle>
+        <CardTitle>אירועים</CardTitle>
         <CardDescription>
-          Manage your events and track participant attendance.
+          נהל את האירועים שלך ועקוב אחר נוכחות המשתתפים
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="sm:table-cell">
-                Events
+              <TableHead className="sm:table-cell text-right">
+                אירועים
               </TableHead>
-              <TableHead className=" md:table-cell">Name</TableHead>
-              <TableHead className="hidden  md:table-cell">Date</TableHead>
-              <TableHead className="">Status</TableHead>
-
-              <TableHead className="hidden  md:table-cell">
-                All participants
+              <TableHead className="md:table-cell text-right">שם</TableHead>
+              <TableHead className="hidden md:table-cell text-right">תאריך</TableHead>
+              <TableHead className="text-right">סטטוס</TableHead>
+              <TableHead className="hidden md:table-cell text-right">
+                כל המשתתפים
               </TableHead>
-              <TableHead className="hidden  md:table-cell">
-                Arrived participants
+              <TableHead className="hidden md:table-cell text-right">
+                משתתפים שהגיעו
               </TableHead>
-              <TableHead className="">
-                <span className="sr-only">Actions</span>
+              <TableHead className="text-right">
+                <span className="sr-only">פעולות</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -85,11 +84,11 @@ export function EventsTable({
       <CardFooter>
         <form className="flex items-center w-full justify-between">
           <div className="text-xs text-muted-foreground">
-            Showing{' '}
+            מציג{' '}
             <strong>
-              {Math.max(0, Math.min(offset - eventsPerPage, totalEvents) + 1)}-{offset}
+              {Math.max(0, Math.min(offset, totalEvents) + 1)}-{offset + eventsPerPage}
             </strong>{' '}
-            of <strong>{totalEvents}</strong> events
+            מתוך <strong>{totalEvents}</strong> אירועים
           </div>
           <div className="flex">
             <Button
@@ -97,10 +96,10 @@ export function EventsTable({
               variant="ghost"
               size="sm"
               type="submit"
-              disabled={offset  < eventsPerPage}
+              disabled={offset < eventsPerPage}
             >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Prev
+              <ChevronRight className="ml-2 h-4 w-4" />
+              הקודם
             </Button>
             <Button
               formAction={nextPage}
@@ -109,8 +108,8 @@ export function EventsTable({
               type="submit"
               disabled={offset + eventsPerPage > totalEvents}
             >
-              Next
-              <ChevronRight className="ml-2 h-4 w-4" />
+              הבא
+              <ChevronLeft className="mr-2 h-4 w-4" />
             </Button>
           </div>
         </form>

@@ -9,7 +9,7 @@ import {
   serial,
   integer
 } from 'drizzle-orm/pg-core';
-import { count, eq, ilike, and, isNull, isNotNull } from 'drizzle-orm';
+import { count, eq, ilike, and, isNull, isNotNull, or } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { sql } from 'drizzle-orm';
 import { put } from '@vercel/blob';
@@ -242,7 +242,13 @@ export async function getParticipants(
       participants: await db
         .select()
         .from(participants)
-        .where(ilike(participants.name, `%${search}%`))
+        .where(
+          or(
+            ilike(participants.name, `%${search}%`),
+            // Only search pn/nid if search string is a number
+            sql`${participants.pn}::text = ${search} OR ${participants.nid}::text = ${search}`
+          )
+        )
         .limit(1000),
       newOffset: null,
       totalParticipants: 0
@@ -277,10 +283,10 @@ export async function getParticipants(
     );
 
   let moreParticipants = await query
-    .limit(5)
+    .limit(10)
     .offset(offset);
 
-  let newOffset = moreParticipants.length >= 5 ? offset + 5 : null;
+  let newOffset = moreParticipants.length >= 10 ? offset + 10 : null;
 
   return {
     participants: moreParticipants,
@@ -291,4 +297,23 @@ export async function getParticipants(
 
 export async function deleteParticipantById(id: number) {
   await db.delete(participants).where(eq(participants.id, id));
+}
+
+export async function checkParticipantStatus(eventId: number, pn: number): Promise<'new' | 'active' | 'exited'> {
+  const existingParticipant = await db
+    .select()
+    .from(participants)
+    .where(
+      and(
+        eq(participants.eventId, eventId),
+        eq(participants.pn, pn)
+      )
+    )
+    .limit(1);
+
+  if (existingParticipant.length === 0) {
+    return 'new';
+  }
+
+  return existingParticipant[0].exitedTime ? 'exited' : 'active';
 }

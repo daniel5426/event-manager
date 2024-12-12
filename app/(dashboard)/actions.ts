@@ -1,10 +1,12 @@
 'use server';
 
-import { deleteEventById, deleteParticipantById, addEvent, registerParticipant, addParticipant } from '@/lib/db';
+import { deleteEventById, deleteParticipantById, addEvent, registerParticipant, addParticipant, checkParticipantStatus } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { db, participants } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import * as XLSX from 'xlsx';
+import { z } from 'zod';
+import { signIn } from '@/lib/auth';
 
 export async function exportParticipants(eventId: number) {
   // Get all participants for the event
@@ -104,3 +106,45 @@ export async function updateParticipantExit(formData: FormData) {
     .where(eq(participants.id, id));
   revalidatePath('/');
 }
+
+export async function checkParticipantStatusAction(eventId: number, pn: number) {
+  return await checkParticipantStatus(eventId, pn);
+}
+
+const authFormSchema = z.object({
+  username: z.string(),
+  password: z.string(),
+});
+
+export interface LoginActionState {
+  status: 'idle' | 'in_progress' | 'success' | 'failed' | 'invalid_data';
+}
+
+export const login = async (
+  _: LoginActionState,
+  formData: FormData,
+): Promise<LoginActionState> => {
+  try {
+    const validatedData = authFormSchema.parse({
+      username: formData.get('username'),
+      password: formData.get('password'),
+    });
+
+    const result = await signIn('credentials', {
+      username: validatedData.username,
+      password: validatedData.password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      return { status: 'failed' };
+    }
+
+    return { status: 'success' };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { status: 'invalid_data' };
+    }
+    return { status: 'failed' };
+  }
+};

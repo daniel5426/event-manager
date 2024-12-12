@@ -33,10 +33,8 @@ export async function User() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>החשבון שלי</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Settings</DropdownMenuItem>
-        <DropdownMenuItem>Support</DropdownMenuItem>
         <DropdownMenuSeparator />
         {user ? (
           <DropdownMenuItem>
@@ -46,12 +44,12 @@ export async function User() {
                 await signOut();
               }}
             >
-              <button type="submit">Sign Out</button>
+              <button type="submit">התנתק</button>
             </form>
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem>
-            <Link href="/login">Sign In</Link>
+            <Link href="/login">התחבר</Link>
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
