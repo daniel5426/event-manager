@@ -53,7 +53,7 @@ export function EventsTable({
           נהל את האירועים שלך ועקוב אחר נוכחות המשתתפים
         </CardDescription>
       </CardHeader>
-      <CardContent className="max-w-[92vw] overflow-hidden">
+      <CardContent className="max-w-[91vw] overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
