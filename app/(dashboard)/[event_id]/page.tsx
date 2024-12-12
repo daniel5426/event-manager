@@ -12,18 +12,25 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AddParticipantForm } from './add-part-form';
 import { ParticipantsTabs } from './participants-tabs';
 
+interface PageProps {
+  params: {
+    event_id: string
+  }
+  searchParams: {
+    q?: string
+    offset?: string
+    status?: string
+  }
+}
+
 export default async function ParticipantsPage({
   params,
   searchParams,
-}: {
-  params: Promise<{ event_id: string }>;
-  searchParams: Promise<{ q: string; offset: string; status?: string }>;
-}) {
-  const eventId = (await params).event_id;
-  const searchParamsResolved = await searchParams;
-  const search = searchParamsResolved.q ?? '';
-  const offset = searchParamsResolved.offset ?? 0;
-  const status = searchParamsResolved.status ?? 'all';
+}: PageProps) {
+  const eventId = params.event_id;
+  const search = searchParams.q ?? '';
+  const offset = searchParams.offset ?? 0;
+  const status = searchParams.status ?? 'all';
   
   const { participants, newOffset, totalParticipants } = await getParticipants(
     Number(eventId),

@@ -7,12 +7,18 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { getEvent } from "@/lib/db";
+
+interface PageProps {
+  params: {
+    event_id: string
+  }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
 export default async function BreadcrumbSlot({
-    params
-}: {
-    params: { event_id: string }
-}) {
-    const eventId = (await params).event_id;
+    params,
+}: PageProps) {
+    const eventId = params.event_id;
     // Fetch event details here
     const event = await getEvent(parseInt(eventId)); // You'll need to implement this function
     return (

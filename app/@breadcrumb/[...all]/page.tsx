@@ -9,9 +9,16 @@ import {
 import React from "react";
 import type { ReactElement } from "react";
 
+interface PageProps {
+	params: {
+		all: string[]
+	}
+	searchParams: { [key: string]: string | string[] | undefined }
+}
+
 export default function BreadcrumbSlot({
 	params,
-}: { params: { all: string[] } }) {
+}: PageProps) {
 	const breadcrumbItems: ReactElement[] = [];
 	let breadcrumbPage: ReactElement = <></>;
 	for (let i = 0; i < params.all.length; i++) {
