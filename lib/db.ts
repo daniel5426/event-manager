@@ -233,7 +233,7 @@ export async function getParticipants(
   eventId: number,
   search: string,
   offset: number,
-  status?: 'arrived' | 'exited'
+  status?: 'hasnt_arrived' | 'arrived' | 'exited'
 ): Promise<{
   participants: SelectParticipant[];
   newOffset: number | null;
@@ -275,6 +275,8 @@ export async function getParticipants(
         ? and(eq(participants.eventId, eventId), isNull(participants.exitedTime), isNotNull(participants.arrivedTime))
         : status === 'exited'
         ? and(eq(participants.eventId, eventId), isNotNull(participants.exitedTime), isNotNull(participants.arrivedTime))
+        : status === 'hasnt_arrived'
+        ? and(eq(participants.eventId, eventId), isNull(participants.arrivedTime))
         : eq(participants.eventId, eventId)
     );
 
@@ -283,10 +285,13 @@ export async function getParticipants(
     .from(participants)
     .where(
       and(
-        eq(participants.eventId, eventId),
-        status === 'arrived' ? isNull(participants.exitedTime) :
-        status === 'exited' ? isNotNull(participants.exitedTime) :
-        undefined
+        status === 'arrived' 
+        ? and(eq(participants.eventId, eventId), isNull(participants.exitedTime), isNotNull(participants.arrivedTime))
+        : status === 'exited'
+        ? and(eq(participants.eventId, eventId), isNotNull(participants.exitedTime), isNotNull(participants.arrivedTime))
+        : status === 'hasnt_arrived'
+        ? and(eq(participants.eventId, eventId), isNull(participants.arrivedTime))
+        : eq(participants.eventId, eventId)
       )
     );
 

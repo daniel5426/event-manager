@@ -154,7 +154,7 @@ export function ParticipantsTable({
             נהל את המשתתפים ועקוב אחר הנוכחות שלהם
           </CardDescription>
         </CardHeader>
-        <CardContent className="max-w-[93vw] overflow-hidden">
+        <CardContent className="max-w-[91vw] overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>

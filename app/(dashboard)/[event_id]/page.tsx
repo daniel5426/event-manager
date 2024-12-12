@@ -4,10 +4,6 @@ import { Button } from '@/components/ui/button';
 import { ParticipantsTable } from './participants-table';
 import { getParticipants } from '@/lib/db';
 import { ExportButton } from './export-button';
-import { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { AddEventForm } from '../add-event-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AddParticipantForm } from './add-part-form';
 import { ParticipantsTabs } from './participants-tabs';
@@ -39,7 +35,7 @@ export default async function ParticipantsPage({
     Number(eventId),
     search,
     Number(offset),
-    status as 'arrived' | 'exited' | undefined
+    status as 'hasnt_arrived' | 'arrived' | 'exited' | undefined
   );
 
   return (
@@ -67,6 +63,9 @@ export default async function ParticipantsPage({
         <div className="overflow-x-auto">
           <TabsList className="w-fit">
             <TabsTrigger value="all" className="text-sm px-2 sm:px-4">הכל</TabsTrigger>
+            <TabsTrigger value="hasnt_arrived" className="text-sm px-2 sm:px-4">
+              <span className="sm:inline">לא נוכח</span>
+            </TabsTrigger>
             <TabsTrigger value="arrived" className="text-sm px-2 sm:px-4">
               <span className="hidden sm:inline">עדיין באירוע</span>
               <span className="sm:hidden">נוכח</span>
@@ -86,6 +85,15 @@ export default async function ParticipantsPage({
           newOffset={newOffset ?? 0}
           totalParticipants={totalParticipants}
           status={undefined}
+        />
+      </TabsContent>
+      <TabsContent value="hasnt_arrived">
+        <ParticipantsTable
+          participants={participants}
+          offset={Number(offset) ?? 0}
+          newOffset={newOffset ?? 0}
+          totalParticipants={totalParticipants}
+          status="hasnt_arrived"
         />
       </TabsContent>
       <TabsContent value="arrived">
