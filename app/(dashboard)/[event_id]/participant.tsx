@@ -17,29 +17,29 @@ export function Participant({
   participant,
   isMobile
 }: {
-  participant: SelectParticipant ;
+  participant: SelectParticipant;
   isMobile: boolean;
 }) {
   return (
     <TableRow>
-      <TableCell className="md:table-cell hidden">
+      <TableCell className="min-w-[80px]">
         <UserIcon className="h-8 w-8 text-gray-400" />
       </TableCell>
-      <TableCell className="md:table-cell hidden">{participant.name? participant.name: 'Unknown'}</TableCell>
-      <TableCell className="md:table-cell hidden">{participant.email? participant.email: 'Unknown'}</TableCell>
-      <TableCell>
-            {participant.arrivedTime
-            ? participant.arrivedTime.toTimeString().slice(0, 5)
-            : 'No date'}
+      <TableCell className="min-w-[120px]">{participant.name ? participant.name : 'Unknown'}</TableCell>
+      <TableCell className="min-w-[100px]">{participant.pn}</TableCell>
+      <TableCell className="min-w-[100px]">
+        {participant.arrivedTime
+          ? participant.arrivedTime.toTimeString().slice(0, 5)
+          : 'No date'}
       </TableCell>
-      <TableCell className="md:table-cell hidden">
-            {participant.exitedTime
-            ? participant.exitedTime.toTimeString().slice(0, 5)
-            : 'No date'}
+      <TableCell className="min-w-[100px]">
+        {participant.exitedTime
+          ? participant.exitedTime.toTimeString().slice(0, 5)
+          : 'No date'}
       </TableCell>
-      <TableCell>{participant.pn}</TableCell>
-      <TableCell className="md:table-cell hidden">{participant.nid}</TableCell>
-      <TableCell className="md:table-cell hidden">
+      <TableCell className="min-w-[150px]">{participant.email ? participant.email : 'Unknown'}</TableCell>
+      <TableCell className="min-w-[120px]">{participant.nid}</TableCell>
+      <TableCell className="min-w-[80px]">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button aria-haspopup="true" size="icon" variant="ghost">

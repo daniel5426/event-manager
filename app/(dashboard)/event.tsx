@@ -21,8 +21,8 @@ export function Event({
   event: SelectEvent & { totalParticipant: number, participantArrived: number };
 }) {
   return (
-    <TableRow className="" dir='rtl'>
-      <TableCell className="hidden sm:table-cell  object-right">
+    <TableRow className="whitespace-nowrap" dir='rtl'>
+      <TableCell className="sm:table-cell object-right min-w-[80px]">
         {event.imageUrl ? (
           <Image
             alt="תמונת אירוע"
@@ -37,12 +37,12 @@ export function Event({
           </div>
         )}
       </TableCell>
-      <TableCell className="font-medium text-right">
+      <TableCell className="font-medium text-right min-w-[120px]">
         <Link href={`/${event.id}`} className="hover:underline">
           {event.name}
         </Link>
       </TableCell>
-      <TableCell className="hidden md:table-cell text-right">
+      <TableCell className="text-right min-w-[120px]">
         {event.eventDate
           ? new Date(event.eventDate).toDateString()
           : 'אין תאריך'}
@@ -70,10 +70,10 @@ export function Event({
         </Badge>
       </TableCell>
 
-      <TableCell className="hidden md:table-cell text-right">
+      <TableCell className="text-right">
         <span className="text-center px-10 text-md">{event.totalParticipant}</span>
       </TableCell>
-      <TableCell className="hidden md:table-cell text-right">
+      <TableCell className="text-right">
         <span className="px-14 text-md">{event.participantArrived}</span>
       </TableCell>
       <TableCell className="text-right">
@@ -85,7 +85,7 @@ export function Event({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            <DropdownMenuLabel>פעו��ות</DropdownMenuLabel>
+            <DropdownMenuLabel>פעולות</DropdownMenuLabel>
             <DropdownMenuItem asChild>
               <button
                 className="w-full"

@@ -53,36 +53,38 @@ export function EventsTable({
           נהל את האירועים שלך ועקוב אחר נוכחות המשתתפים
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="sm:table-cell text-right">
-                אירועים
-              </TableHead>
-              <TableHead className="md:table-cell text-right">שם</TableHead>
-              <TableHead className="hidden md:table-cell text-right">תאריך</TableHead>
-              <TableHead className="text-right">סטטוס</TableHead>
-              <TableHead className="hidden md:table-cell text-right">
-                כל המשתתפים
-              </TableHead>
-              <TableHead className="hidden md:table-cell text-right">
-                משתתפים שהגיעו
-              </TableHead>
-              <TableHead className="text-right">
-                <span className="sr-only">פעולות</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {events.map((event) => (
-              <Event key={event.id} event={event} />
-            ))}
-          </TableBody>
-        </Table>
+      <CardContent className="max-w-[92vw] overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-right min-w-[80px]">
+                  אירועים
+                </TableHead>
+                <TableHead className="text-right min-w-[120px]">שם</TableHead>
+                <TableHead className="text-right min-w-[120px]">תאריך</TableHead>
+                <TableHead className="text-right min-w-[100px]">סטטוס</TableHead>
+                <TableHead className="text-right min-w-[100px]">
+                  כל המשתתפים
+                </TableHead>
+                <TableHead className="text-right min-w-[100px]">
+                  משתתפים שהגיעו
+                </TableHead>
+                <TableHead className="text-right min-w-[80px]">
+                  <span className="sr-only">פעולות</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {events.map((event) => (
+                <Event key={event.id} event={event} />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
       <CardFooter>
-        <form className="flex items-center w-full justify-between">
+        <form className="flex items-center w-[100%] justify-between">
           <div className="text-xs text-muted-foreground">
             מציג{' '}
             <strong>

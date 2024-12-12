@@ -144,33 +144,35 @@ export function ParticipantsTable({
           </div>
         </div>
       )}
-      <Card className="w-full overflow-x-auto" dir='rtl'>
+      <Card className="w-full" dir='rtl'>
         <CardHeader>
           <CardTitle>משתתפים</CardTitle>
           <CardDescription>
             נהל את המשתתפים ועקוב אחר הנוכחות שלהם
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="md:table-cell hidden text-right">משתתפים</TableHead>
-                <TableHead className="md:table-cell hidden text-right">שם</TableHead>
-                <TableHead className="md:table-cell hidden text-right">אימייל</TableHead>
-                <TableHead className="text-right">זמן הגעה</TableHead>
-                <TableHead className="md:table-cell hidden text-right">זמן יציאה</TableHead>
-                <TableHead className="text-right">מספר אישי</TableHead>
-                <TableHead className="md:table-cell hidden text-right">תעודת זהות</TableHead>
-                <TableHead className="md:table-cell hidden text-right">פעולות</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {participants.map((participant) => (
-                <Participant key={participant.id} participant={participant} isMobile={isMobile()} />
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="max-w-[93vw] overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-right min-w-[80px]">משתתפים</TableHead>
+                  <TableHead className="text-right min-w-[120px]">שם</TableHead>
+                  <TableHead className="text-right min-w-[100px]">מספר אישי</TableHead>
+                  <TableHead className="text-right min-w-[100px]">זמן הגעה</TableHead>
+                  <TableHead className="text-right min-w-[100px]">זמן יציאה</TableHead>
+                  <TableHead className="text-right min-w-[150px]">אימייל</TableHead>
+                  <TableHead className="text-right min-w-[120px]">תעודת זהות</TableHead>
+                  <TableHead className="text-right min-w-[80px]">פעולות</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {participants.map((participant) => (
+                  <Participant key={participant.id} participant={participant} isMobile={isMobile()} />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
         <CardFooter>
           <form className="flex items-center w-full justify-between">
