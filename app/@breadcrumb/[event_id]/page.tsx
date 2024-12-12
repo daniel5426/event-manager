@@ -9,18 +9,19 @@ import {
 import { getEvent } from "@/lib/db";
 
 interface PageProps {
-  params: {
-    event_id: string
-  }
-  searchParams: { [key: string]: string | string[] | undefined }
+    params: Promise<{
+        event_id: string
+    }>,
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function BreadcrumbSlot({
     params,
 }: PageProps) {
-    const eventId = params.event_id;
+    const resolvedParams = await params;
+    const eventId = resolvedParams.event_id;
     // Fetch event details here
-    const event = await getEvent(parseInt(eventId)); // You'll need to implement this function
+    const event = await getEvent(parseInt(eventId));
     return (
         <Breadcrumb className="hidden md:flex">
             <BreadcrumbList>

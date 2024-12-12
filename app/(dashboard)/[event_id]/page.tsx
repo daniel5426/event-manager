@@ -13,24 +13,27 @@ import { AddParticipantForm } from './add-part-form';
 import { ParticipantsTabs } from './participants-tabs';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     event_id: string
-  }
-  searchParams: {
+  }>,
+  searchParams: Promise<{
     q?: string
     offset?: string
     status?: string
-  }
+  }>
 }
 
 export default async function ParticipantsPage({
   params,
   searchParams,
 }: PageProps) {
-  const eventId = params.event_id;
-  const search = searchParams.q ?? '';
-  const offset = searchParams.offset ?? 0;
-  const status = searchParams.status ?? 'all';
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  
+  const eventId = resolvedParams.event_id;
+  const search = resolvedSearchParams.q ?? '';
+  const offset = resolvedSearchParams.offset ?? 0;
+  const status = resolvedSearchParams.status ?? 'all';
   
   const { participants, newOffset, totalParticipants } = await getParticipants(
     Number(eventId),

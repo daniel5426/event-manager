@@ -10,25 +10,28 @@ import React from "react";
 import type { ReactElement } from "react";
 
 interface PageProps {
-	params: {
+	params: Promise<{
 		all: string[]
-	}
-	searchParams: { [key: string]: string | string[] | undefined }
+	}>,
+	searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default function BreadcrumbSlot({
+export default async function BreadcrumbSlot({
 	params,
+	searchParams,
 }: PageProps) {
+	const resolvedParams = await params;
+	const resolvedSearchParams = await searchParams;
 	const breadcrumbItems: ReactElement[] = [];
 	let breadcrumbPage: ReactElement = <></>;
-	for (let i = 0; i < params.all.length; i++) {
-		let route = params.all[i];
-		const href = `/${params.all.at(0)}/${route}`;
+	for (let i = 0; i < resolvedParams.all.length; i++) {
+		let route = resolvedParams.all[i];
+		const href = `/${resolvedParams.all.at(0)}/${route}`;
 		if (route === 'login') {
 			route = 'חיבור';
 		}
 		console.log("route", route);
-		if (i === params.all.length - 1) {
+		if (i === resolvedParams.all.length - 1) {
 			breadcrumbPage = (
 				<BreadcrumbItem>
 					<BreadcrumbPage className="capitalize">{route}</BreadcrumbPage>
