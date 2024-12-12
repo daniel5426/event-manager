@@ -60,7 +60,7 @@ export function ParticipantsTable({
       console.log(idNumber.length);
 
 
-    if (idNumber.length === ID_LENGTH) {
+    if (idNumber.length >= ID_LENGTH) {
       const finalId = idNumber;
       navigator.clipboard.writeText(finalId);
       const numericId = finalId.replace(/[^0-9]/g, '')
