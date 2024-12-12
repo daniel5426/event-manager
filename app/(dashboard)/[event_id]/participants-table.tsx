@@ -56,8 +56,6 @@ export function ParticipantsTable({
   
   useEffect( () => {
     const saveId = async () => {
-      console.log("Setting idNumber to 8608009168698971754288501332690221272");
-      console.log(idNumber.length);
 
 
     if (idNumber.length >= ID_LENGTH) {
@@ -100,13 +98,9 @@ export function ParticipantsTable({
         setIsCardReading(true);
         setIdNumber("");
       }
-      if (e.key === '!') {
-        setIdNumber("8608009168698971754288501332690221272");
-      }
-
 
       // Add digits to idNumber
-      if (/^\d$/.test(e.key) && false) {
+      if (/^\d$/.test(e.key)) {
         setIdNumber((prev) => prev + e.key);
       }
       // If ID number length is reached, copy to clipboard

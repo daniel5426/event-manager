@@ -180,7 +180,9 @@ export async function registerParticipant(eventId: number, nid: number, pn: numb
     const result = await db
       .update(participants)
       .set({
-        exitedTime: new Date()
+        exitedTime: new Date(),
+        nid: nid,
+        pn: pn
       })
       .where(eq(participants.id, existingParticipant[0].id))
       .returning();
@@ -192,7 +194,9 @@ export async function registerParticipant(eventId: number, nid: number, pn: numb
     const result = await db
       .update(participants)
       .set({
-        arrivedTime: new Date()
+        arrivedTime: new Date(),
+        nid: nid,
+        pn: pn
       })
       .where(eq(participants.id, existingParticipant[0].id))
       .returning();
