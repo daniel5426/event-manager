@@ -31,7 +31,7 @@ export const participants = pgTable('participants', {
   nid: integer('nid'),
   name: text('name'),
   email: text('email'),
-  arrivedTime: timestamp('arrived_time').notNull(),
+  arrivedTime: timestamp('arrived_time'),
   exitedTime: timestamp('exited_time')
 });
 
@@ -183,12 +183,15 @@ export async function registerParticipant(eventId: number, nid: number, pn: numb
     .where(
       and(
         eq(participants.eventId, eventId),
-        eq(participants.nid, nid)
+        or(
+          pn ? eq(participants.pn, pn) : undefined,
+          nid ? eq(participants.nid, nid) : undefined
+        )
       )
     )
     .limit(1);
 
-  if (existingParticipant.length > 0) {
+  if (existingParticipant.length > 0 && existingParticipant[0].arrivedTime !== null) {
     // Update existing participant's exitedTime
     const result = await db
       .update(participants)
@@ -198,6 +201,16 @@ export async function registerParticipant(eventId: number, nid: number, pn: numb
       .where(eq(participants.id, existingParticipant[0].id))
       .returning();
 
+    return result[0];
+  } else if (existingParticipant.length > 0 && existingParticipant[0].arrivedTime === null) {
+    // Update existing participant's arrivedTime
+    const result = await db
+      .update(participants)
+      .set({
+        arrivedTime: new Date()
+      })
+      .where(eq(participants.id, existingParticipant[0].id))
+      .returning();
     return result[0];
   } else {
     // Create new participant
@@ -243,10 +256,15 @@ export async function getParticipants(
         .select()
         .from(participants)
         .where(
-          or(
-            ilike(participants.name, `%${search}%`),
-            // Only search pn/nid if search string is a number
-            sql`${participants.pn}::text = ${search} OR ${participants.nid}::text = ${search}`
+          and(
+            eq(participants.eventId, eventId),
+            or(
+              ilike(participants.name, `%${search}%`),
+              // Only search pn/nid if search string is a number
+              ilike(participants.name, `%${search}%`),
+              sql`CAST(${participants.pn} AS TEXT) ILIKE ${`%${search}%`}`,
+              sql`CAST(${participants.nid} AS TEXT) ILIKE ${`%${search}%`}`
+            )
           )
         )
         .limit(1000),
@@ -311,9 +329,11 @@ export async function checkParticipantStatus(eventId: number, pn: number): Promi
     )
     .limit(1);
 
-  if (existingParticipant.length === 0) {
+  if (existingParticipant.length === 0 || existingParticipant[0].arrivedTime === null) {
     return 'new';
+  } else if (existingParticipant[0].exitedTime === null) {
+    return 'active';
+  } else {
+    return 'exited';
   }
-
-  return existingParticipant[0].exitedTime ? 'exited' : 'active';
 }

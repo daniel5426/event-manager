@@ -85,7 +85,7 @@ export async function addEventAction(
         pn: (row as any).PN || null,
         name: (row as any).Name || null,
         email: (row as any).Email || null,
-        arrivedTime: new Date()
+        arrivedTime: null,
       });
     }
   }
