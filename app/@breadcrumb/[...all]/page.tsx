@@ -28,7 +28,7 @@ export default async function BreadcrumbSlot({
 		let route = resolvedParams.all[i];
 		const href = `/${resolvedParams.all.at(0)}/${route}`;
 		if (route === 'login') {
-			route = 'חיבור';
+			return null;
 		}
 		console.log("route", route);
 		if (i === resolvedParams.all.length - 1) {
