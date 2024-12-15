@@ -59,11 +59,13 @@ export function EventsAreaChart() {
       <CardContent>
         <ChartContainer 
           config={chartConfig}
-          className="h-[200px] w-[600px]"
+          className="h-[200px] md:h-[200px] w-full"
         >
           <AreaChart
             accessibilityLayer
             data={data}
+            width={undefined}
+            height={undefined}
             margin={{
               top: 8,
               left: 12,

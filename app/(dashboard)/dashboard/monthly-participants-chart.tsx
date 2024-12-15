@@ -53,8 +53,8 @@ export function MonthlyParticipantsChart() {
         <CardDescription>משתתפים פעילים ומגיעים בכל חודש</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[200px] w-[600px]">
-          <BarChart accessibilityLayer data={data}>
+        <ChartContainer config={chartConfig} className="h-[200px] md:h-[200px] w-full">
+          <BarChart accessibilityLayer data={data} width={undefined} height={undefined}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"

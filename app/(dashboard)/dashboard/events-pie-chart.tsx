@@ -79,9 +79,9 @@ export function EventsPieChart() {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square h-[250px]"
+          className="mx-auto aspect-square h-[250px] md:h-[250px]"
         >
-          <PieChart width={500} height={500}>
+          <PieChart width={400} height={400}>
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
