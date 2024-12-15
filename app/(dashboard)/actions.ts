@@ -21,8 +21,8 @@ export async function exportParticipants(eventId: number) {
     'Email': p.email,
     'PN': p.pn,
     'NID': p.nid,
-    'Arrived Time': p.arrivedTime ? new Date(p.arrivedTime).toLocaleString() : '',
-    'Exited Time': p.exitedTime ? new Date(p.exitedTime).toLocaleString() : ''
+    'Arrived Time': p.arrivedTime ? new Date(p.arrivedTime).toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' }) : '',
+    'Exited Time': p.exitedTime ? new Date(p.exitedTime).toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' }) : ''
   }));
 
   // Create worksheet
@@ -55,8 +55,15 @@ export async function addParticipantAction(
   email: string | null,
   eventId: number
 ) {
-  // First create the event
-  await addParticipant(eventId, nid, pn, name, email);
+  try {
+    await addParticipant(eventId, nid, pn, name, email);
+    return { success: true, error: null };
+  } catch (error) {
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'An unknown error occurred' };
+  }
 }
 
 export async function addEventAction(

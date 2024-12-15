@@ -43,22 +43,9 @@ export default async function ParticipantsPage({
       <div className="flex items-center">
         <div className="mr-auto flex items-center gap-2 shrink-0">
           <ExportButton eventId={Number(eventId)} />
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button size="sm" className="h-8 gap-1">
-                <PlusCircle className="h-3.5 w-3.5" />
-                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                  הוסף משתתף
-                </span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className='w-full max-w-sm'>
-              <DialogHeader>
-                <DialogTitle>הוסף משתתף</DialogTitle>
-              </DialogHeader>
-              <AddParticipantForm />
-            </DialogContent>
-          </Dialog>
+        </div>
+        <div className="mr-auto flex items-end gap-5">
+          <AddParticipantForm eventId={Number(eventId)} />
         </div>
         <div className="overflow-x-auto">
           <TabsList className="w-fit">

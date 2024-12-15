@@ -6,15 +6,16 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { addParticipantAction } from "../actions";
 import { useRouter, useParams } from "next/navigation";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+import { PlusCircle } from "lucide-react";
 
-export function AddParticipantForm() {
+export function AddParticipantForm( {eventId}: {eventId: number}) {
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [pn, setPn] = useState<number | null>(null);
   const [nid, setNid] = useState<number | null>(null);
   const [email, setEmail] = useState('');
   const router = useRouter();
-  const params = useParams();
-  const eventId = params.event_id as string;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +28,7 @@ export function AddParticipantForm() {
       setPn(null);
       setNid(null);
       setEmail('');
+      setOpen(false);
       // Emit a custom event that the parent component can listen to
       const closeEvent = new CustomEvent('closeAddParticipantForm');
       window.dispatchEvent(closeEvent);
@@ -36,7 +38,20 @@ export function AddParticipantForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <Dialog>
+    <DialogTrigger asChild>
+      <Button size="sm" className="h-8 gap-1">
+        <PlusCircle className="h-3.5 w-3.5" />
+        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+          הוסף משתתף
+        </span>
+      </Button>
+    </DialogTrigger>
+    <DialogContent className='w-full max-w-sm'>
+      <DialogHeader>
+        <DialogTitle>הוסף משתתף</DialogTitle>
+      </DialogHeader>
+      <form onSubmit={handleSubmit} className="space-y-8">
         <div className="flex-1 space-y-4">
           <div>
             <Label htmlFor="name">שם</Label>
@@ -76,5 +91,7 @@ export function AddParticipantForm() {
         </div>
       <Button type="submit" className="w-full">הוסף משתתף</Button>
     </form>
+    </DialogContent>
+  </Dialog>
   );
 }

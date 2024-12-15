@@ -141,6 +141,26 @@ export async function deleteEventById(id: number) {
 }
 
 export async function addParticipant(eventId: number, nid: number | null, pn: number | null, name: string | null = null, email: string | null = null) {
+  // Check for existing participant with same pn or nid
+  const existingParticipant = await db
+    .select()
+    .from(participants)
+    .where(
+      and(
+        eq(participants.eventId, eventId),
+        or(
+          pn ? eq(participants.pn, pn) : undefined,
+          nid ? eq(participants.nid, nid) : undefined
+        )
+      )
+    )
+    .limit(1);
+
+  // If participant already exists, throw error
+  if (existingParticipant.length > 0) {
+    throw new Error('Participant with this PN or NID already exists');
+  }
+
   // If no existing participant found, create new one
   const result = await db
     .insert(participants)
@@ -150,7 +170,7 @@ export async function addParticipant(eventId: number, nid: number | null, pn: nu
       pn,
       name,
       email,
-      arrivedTime: new Date(),
+      arrivedTime: null,
       exitedTime: null
     })
     .returning();
@@ -323,10 +343,16 @@ export async function checkParticipantStatus(eventId: number, pn: number): Promi
       )
     )
     .limit(1);
+  const allParticipants = await db.select().from(participants).where(eq(participants.eventId, eventId));
+  console.log(allParticipants);
+  console.log(pn);
+
 
   if (existingParticipant.length === 0) {
     return { status: 'not_registered', name: null };
   }
+
+  console.log("Existing participant:", existingParticipant);
 
   let status: 'new' | 'active' | 'exited' = 'new';
   if (existingParticipant[0].arrivedTime === null) {
