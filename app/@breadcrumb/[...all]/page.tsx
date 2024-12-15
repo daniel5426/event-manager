@@ -51,7 +51,7 @@ export default async function BreadcrumbSlot({
 	}
 
 	return (
-		<Breadcrumb>
+		<Breadcrumb className="hidden md:flex">
 			<BreadcrumbList>
 				<BreadcrumbItem>
 					<BreadcrumbLink href="/">בית</BreadcrumbLink>
