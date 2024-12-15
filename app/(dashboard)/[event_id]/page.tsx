@@ -7,6 +7,7 @@ import { ExportButton } from './export-button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AddParticipantForm } from './add-part-form';
 import { ParticipantsTabs } from './participants-tabs';
+import { ParticipantsPieChart } from './participants-pie-chart';
 
 interface PageProps {
   params: Promise<{
@@ -43,28 +44,30 @@ export default async function ParticipantsPage({
       <div className="flex items-center">
         <div className="mr-auto flex items-center gap-2 shrink-0">
           <ExportButton eventId={Number(eventId)} />
-        </div>
-        <div className="mr-auto flex items-end gap-5">
           <AddParticipantForm eventId={Number(eventId)} />
         </div>
         <div className="overflow-x-auto">
           <TabsList className="w-fit">
-            <TabsTrigger value="all" className="text-sm px-2 sm:px-4">הכל</TabsTrigger>
             <TabsTrigger value="hasnt_arrived" className="text-sm px-2 sm:px-4">
               <span className="sm:inline">לא נוכח</span>
-            </TabsTrigger>
-            <TabsTrigger value="arrived" className="text-sm px-2 sm:px-4">
-              <span className="hidden sm:inline">עדיין באירוע</span>
-              <span className="sm:hidden">נוכח</span>
             </TabsTrigger>
             <TabsTrigger value="exited" className="text-sm px-2 sm:px-4">
               <span className="hidden sm:inline">יצא מהאירוע</span>
               <span className="sm:hidden">יצא</span>
             </TabsTrigger>
+            <TabsTrigger value="arrived" className="text-sm px-2 sm:px-4">
+              <span className="hidden sm:inline">עדיין באירוע</span>
+              <span className="sm:hidden">נוכח</span>
+            </TabsTrigger>
+            <TabsTrigger value="all" className="text-sm px-2 sm:px-4">הכל</TabsTrigger>
           </TabsList>
         </div>
-
       </div>
+
+      <div className="my-6">
+        <ParticipantsPieChart eventId={Number(eventId)} />
+      </div>
+
       <TabsContent value="all">
         <ParticipantsTable
           participants={participants}

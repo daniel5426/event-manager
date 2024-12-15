@@ -55,8 +55,9 @@ export function ParticipantsTable({
   const [messageType, setMessageType] = useState<'welcome' | 'goodbye' | 'detected' | 'not_invited'>('welcome');
   
   useEffect( () => {
+    console.log(idNumber);
     const saveId = async () => {
-      if (idNumber.length >= ID_LENGTH) {
+      if (idNumber.length === ID_LENGTH) {
         const finalId = idNumber;
         navigator.clipboard.writeText(finalId);
         const numericId = finalId.replace(/[^0-9]/g, '')
@@ -64,6 +65,7 @@ export function ParticipantsTable({
         const pn = numericId.slice(6, 13);    // Next 7
         const part3 = numericId.slice(13, 25);   // Next 12
         const nid = numericId.slice(25, 34);  // Last 9
+        console.log(pn);
         
         // Check participant status before registration
         const status = await checkParticipantStatusAction(Number(params.event_id), Number(pn));
@@ -99,7 +101,18 @@ export function ParticipantsTable({
   }, [idNumber]);
 
   useEffect(() => {
+    let lastKeyTime = 0;
+    
     const handleKeydown = async (e: any) => {
+      const currentTime = Date.now();
+      
+      // If more than 1 second has passed since the last keypress
+      if (currentTime - lastKeyTime > 500) {
+        setIdNumber(""); // Reset the idNumber
+      }
+      
+      lastKeyTime = currentTime;
+
       if (!isCardReading) {
         setIsCardReading(true);
         setIdNumber("");
@@ -109,7 +122,6 @@ export function ParticipantsTable({
       if (/^\d$/.test(e.key)) {
         setIdNumber((prev) => prev + e.key);
       }
-      // If ID number length is reached, copy to clipboard
     };
 
     window.addEventListener("keydown", handleKeydown);
@@ -143,7 +155,7 @@ export function ParticipantsTable({
               <h2 className="text-2xl font-bold mb-4">
                 {messageType === 'welcome' && 'ברוך הבא!'}
                 {messageType === 'goodbye' && 'להתראות!'}
-                {messageType === 'detected' && 'כרטיס זוהה'}
+                {messageType === 'detected' && 'כרטיס ז��הה'}
                 {messageType === 'not_invited' && 'לא רשום'}
               </h2>
               <p className="text-xl">

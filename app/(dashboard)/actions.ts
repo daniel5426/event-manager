@@ -8,6 +8,10 @@ import * as XLSX from 'xlsx';
 import { z } from 'zod';
 import { signIn } from '@/lib/auth';
 
+export async function getParticipants(eventId: number) {
+  return await db.select().from(participants).where(eq(participants.eventId, eventId));
+}
+
 export async function exportParticipants(eventId: number) {
   // Get all participants for the event
   const allParticipants = await db

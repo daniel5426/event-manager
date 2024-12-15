@@ -158,7 +158,7 @@ export async function addParticipant(eventId: number, nid: number | null, pn: nu
 
   // If participant already exists, throw error
   if (existingParticipant.length > 0) {
-    throw new Error('Participant with this PN or NID already exists');
+    throw new Error('משתתף עם מספר אישי או תעודת זהות זה כבר קיים');
   }
 
   // If no existing participant found, create new one
