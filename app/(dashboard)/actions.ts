@@ -107,6 +107,15 @@ export async function updateParticipantExit(formData: FormData) {
   revalidatePath('/');
 }
 
+export async function updateParticipantArrival(formData: FormData) {
+  let id = Number(formData.get('id'));
+  await db
+    .update(participants)
+    .set({ arrivedTime: new Date() })
+    .where(eq(participants.id, id));
+  revalidatePath('/');
+}
+
 export async function checkParticipantStatusAction(eventId: number, pn: number) {
   return await checkParticipantStatus(eventId, pn);
 }

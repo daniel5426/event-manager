@@ -65,7 +65,7 @@ function DesktopNav() {
           <span className="sr-only">Acme Inc</span>
         </Link>
 
-        <NavItem href="#" label="דאשבורד">
+        <NavItem href="/dashboard" label="דאשבורד">
           <Home className="h-5 w-5" />
         </NavItem>
 

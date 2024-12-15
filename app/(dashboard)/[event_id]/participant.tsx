@@ -10,7 +10,7 @@ import {
 import { Ticket, MoreHorizontal, UserIcon } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { SelectParticipant } from '@/lib/db';
-import { deleteParticipant, updateParticipantExit } from '../actions';
+import { deleteParticipant, updateParticipantExit, updateParticipantArrival } from '../actions';
 import { unknown } from 'zod';
 
 export function Participant({
@@ -49,12 +49,22 @@ export function Participant({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>פעולות</DropdownMenuLabel>
-            <DropdownMenuItem>
-              <form action={updateParticipantExit} className="text-right">
-                <input type="hidden" name="id" value={participant.id} />
-                <button type="submit">יציאה</button>
-              </form>
-            </DropdownMenuItem>
+            {!participant.arrivedTime && (
+              <DropdownMenuItem>
+                <form action={updateParticipantArrival} className="text-right">
+                  <input type="hidden" name="id" value={participant.id} />
+                  <button type="submit">כניסה</button>
+                </form>
+              </DropdownMenuItem>
+            )}
+            {participant.arrivedTime && !participant.exitedTime && (
+              <DropdownMenuItem>
+                <form action={updateParticipantExit} className="text-right">
+                  <input type="hidden" name="id" value={participant.id} />
+                  <button type="submit">יציאה</button>
+                </form>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem>
               <form action={deleteParticipant}>
                 <input type="hidden" name="id" value={participant.id} />
