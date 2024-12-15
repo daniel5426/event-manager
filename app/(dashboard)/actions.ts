@@ -76,32 +76,43 @@ export async function addEventAction(
   eventDate: Date, 
   participantsFile: File | null
 ) {
-  console.log("Event created:");
-
   // First create the event
   const event = await addEvent(name, imageUrl, eventDate);
 
-  // If there's a participants file, process it
+  // If there's a participants file, process it asynchronously
   if (participantsFile) {
-    const arrayBuffer = await participantsFile.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer);
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(worksheet);
-
-    // Process each row and create participants
-    for (const row of data) {
-      await db.insert(participants).values({
-        eventId: event.id,
-        nid: (row as any).NID || null,
-        pn: (row as any).PN || null,
-        name: (row as any).Name || null,
-        email: (row as any).Email || null,
-        arrivedTime: null,
-      });
-    }
+    // Start processing in the background
+    processParticipantsFile(participantsFile, event.id).catch(error => {
+      console.error('Error processing participants file:', error);
+      // You might want to add some error tracking/logging here
+    });
   }
 
   return event;
+}
+
+async function processParticipantsFile(file: File, eventId: number) {
+  const arrayBuffer = await file.arrayBuffer();
+  const workbook = XLSX.read(arrayBuffer);
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  const data = XLSX.utils.sheet_to_json(worksheet);
+
+  // Prepare bulk insert data
+  const participantsData = data.map(row => ({
+    eventId,
+    nid: (row as any).NID || null,
+    pn: (row as any).PN || null,
+    name: (row as any).Name || null,
+    email: (row as any).Email || null,
+    arrivedTime: null,
+  }));
+
+  // Perform bulk insert in chunks to avoid memory issues
+  const chunkSize = 100;
+  for (let i = 0; i < participantsData.length; i += chunkSize) {
+    const chunk = participantsData.slice(i, i + chunkSize);
+    await db.insert(participants).values(chunk);
+  }
 }
 
 export async function registerParticipantAction(eventId: number, nid: number, pn: number) {
