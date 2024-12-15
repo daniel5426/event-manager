@@ -312,7 +312,7 @@ export async function deleteParticipantById(id: number) {
   await db.delete(participants).where(eq(participants.id, id));
 }
 
-export async function checkParticipantStatus(eventId: number, pn: number): Promise<{status: 'new' | 'active' | 'exited', name: string | null}> {
+export async function checkParticipantStatus(eventId: number, pn: number): Promise<{status: 'new' | 'active' | 'exited' | 'not_registered', name: string | null}> {
   const existingParticipant = await db
     .select()
     .from(participants)
@@ -323,17 +323,22 @@ export async function checkParticipantStatus(eventId: number, pn: number): Promi
       )
     )
     .limit(1);
+
+  if (existingParticipant.length === 0) {
+    return { status: 'not_registered', name: null };
+  }
+
   let status: 'new' | 'active' | 'exited' = 'new';
-  let name = null;
-  if (existingParticipant.length === 0 || existingParticipant[0].arrivedTime === null) {
+  if (existingParticipant[0].arrivedTime === null) {
     status = 'new';
   } else if (existingParticipant[0].exitedTime === null) {
     status = 'active';
   } else {
     status = 'exited';
   }
-  if (existingParticipant.length > 0) {
-    name = existingParticipant[0].name;
-  }
-  return {status, name};
+
+  return {
+    status,
+    name: existingParticipant[0].name
+  };
 }

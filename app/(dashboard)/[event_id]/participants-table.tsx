@@ -52,45 +52,51 @@ export function ParticipantsTable({
   const { width, height } = useWindowSize();
   const [showWelcome, setShowWelcome] = useState(false);
   const [welcomeName, setWelcomeName] = useState('');
-  const [messageType, setMessageType] = useState<'welcome' | 'goodbye' | 'detected'>('welcome');
+  const [messageType, setMessageType] = useState<'welcome' | 'goodbye' | 'detected' | 'not_invited'>('welcome');
   
   useEffect( () => {
     const saveId = async () => {
+      if (idNumber.length >= ID_LENGTH) {
+        const finalId = idNumber;
+        navigator.clipboard.writeText(finalId);
+        const numericId = finalId.replace(/[^0-9]/g, '')
+        const part1 = numericId.slice(0, 6);    // First 6 numbers
+        const pn = numericId.slice(6, 13);    // Next 7
+        const part3 = numericId.slice(13, 25);   // Next 12
+        const nid = numericId.slice(25, 34);  // Last 9
+        
+        // Check participant status before registration
+        const status = await checkParticipantStatusAction(Number(params.event_id), Number(pn));
+        
+        if (status.status === 'not_registered') {
+          setMessageType('not_invited');
+          setShowWelcome(true);
+          setTimeout(() => setShowWelcome(false), 5000);
+          setIdNumber("");
+          setIsCardReading(false);
+          return; // Exit early if participant is not registered
+        }
 
+        if (status.status === 'new') {
+          setMessageType('welcome');
+        } else if (status.status === 'active') {
+          setMessageType('goodbye');
+        } else {
+          setMessageType('detected');
+        }
 
-    if (idNumber.length >= ID_LENGTH) {
-      const finalId = idNumber;
-      navigator.clipboard.writeText(finalId);
-      const numericId = finalId.replace(/[^0-9]/g, '')
-      const part1 = numericId.slice(0, 6);    // First 6 numbers
-      const pn = numericId.slice(6, 13);    // Next 7
-      const part3 = numericId.slice(13, 25);   // Next 12
-      const nid = numericId.slice(25, 34);  // Last 9
-      
-      // Check participant status before registration
-      const status = await checkParticipantStatusAction(Number(params.event_id), Number(pn));
-      
-      if (status.status === 'new') {
-        setMessageType('welcome');
-      } else if (status.status === 'active') {
-        setMessageType('goodbye');
-      } else {
-        setMessageType('detected');
+        setWelcomeName(status.name ?? pn);
+        setShowWelcome(true);
+        setTimeout(() => setShowWelcome(false), 5000);
+
+        await registerParticipantAction(Number(params.event_id), Number(nid), Number(pn));
+        router.refresh();
+        setIdNumber("");
+        setIsCardReading(false);
       }
-
-      setWelcomeName(status.name ?? pn);
-      setShowWelcome(true);
-      setTimeout(() => setShowWelcome(false), 5000);
-
-      await registerParticipantAction(Number(params.event_id), Number(nid), Number(pn));
-      router.refresh();
-      setIdNumber("");
-      setIsCardReading(false);
-    }}
+    }
     saveId();
-    
-}, [idNumber]);
-
+  }, [idNumber]);
 
   useEffect(() => {
     const handleKeydown = async (e: any) => {
@@ -111,7 +117,6 @@ export function ParticipantsTable({
     return () => window.removeEventListener("keydown", handleKeydown);
   }, [isCardReading]);
 
-
   function prevPage() {
     router.push(`/${params.event_id}?offset=${Math.max(0, offset - participantsPerPage)}&status=${status}`, { scroll: false });
   }
@@ -124,24 +129,28 @@ export function ParticipantsTable({
     <>
       {showWelcome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-hidden">
-          <ReactConfetti
-            width={width}
-            height={height}
-            recycle={false}
-            numberOfPieces={200}
-            style={{ position: 'fixed', top: 0, left: 0, zIndex: 51 }}
-          />
+          {messageType !== 'not_invited' && (
+            <ReactConfetti
+              width={width}
+              height={height}
+              recycle={false}
+              numberOfPieces={200}
+              style={{ position: 'fixed', top: 0, left: 0, zIndex: 51 }}
+            />
+          )}
           <div className="relative w-full max-w-sm mx-auto">
             <div className="bg-white rounded-lg p-8 text-center shadow-lg">
               <h2 className="text-2xl font-bold mb-4">
                 {messageType === 'welcome' && 'ברוך הבא!'}
                 {messageType === 'goodbye' && 'להתראות!'}
                 {messageType === 'detected' && 'כרטיס זוהה'}
+                {messageType === 'not_invited' && 'לא רשום'}
               </h2>
               <p className="text-xl">
                 {messageType === 'welcome' && `משתתף ${welcomeName} הגיע`}
                 {messageType === 'goodbye' && `משתתף ${welcomeName} יצא`}
                 {messageType === 'detected' && `הכרטיס של ${welcomeName} זוהה`}
+                {messageType === 'not_invited' && 'המשתתף אינו רשום לאירוע'}
               </p>
             </div>
           </div>
