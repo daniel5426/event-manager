@@ -68,7 +68,7 @@ export function ParticipantsPieChart({ eventId }: { eventId: number }) {
     fetchData(); // Initial fetch
 
     // Set up interval for periodic updates
-    const intervalId = setInterval(fetchData, 10000); // 10 seconds
+    const intervalId = setInterval(fetchData, 3000); // 10 seconds
 
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
