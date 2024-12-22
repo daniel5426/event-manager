@@ -89,7 +89,7 @@ export function ParticipantsTable({
 
         setWelcomeName(status.name ?? pn);
         setShowWelcome(true);
-        setTimeout(() => setShowWelcome(false), 5000);
+        setTimeout(() => setShowWelcome(false), 3000);
 
         await registerParticipantAction(Number(params.event_id), Number(nid), Number(pn));
         router.refresh();

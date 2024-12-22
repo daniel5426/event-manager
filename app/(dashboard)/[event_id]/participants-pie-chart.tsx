@@ -39,33 +39,39 @@ const chartConfig = {
 export function ParticipantsPieChart({ eventId }: { eventId: number }) {
   const [data, setData] = useState<{ name: string; value: number; fill: string }[]>([]);
   
-  useEffect(() => {
-    const fetchData = async () => {
-      const participants = await getParticipants(eventId);
-      const arrivedData = participants.filter(p => p.arrivedTime !== null && p.exitedTime === null);
-      const exitedData = participants.filter(p => p.exitedTime !== null);
-      const notArrivedData = participants.filter(p => p.arrivedTime === null && p.exitedTime === null);
-      
-      setData([
-        {
-          name: "נוכחים",
-          value: arrivedData.length,
-          fill: "hsl(var(--chart-1))"
-        },
-        {
-          name: "יצאו",
-          value: exitedData.length,
-          fill: "hsl(var(--chart-2))"
-        },
-        {
-          name: "לא הגיעו",
-          value: notArrivedData.length,
-          fill: "hsl(var(--chart-3))"
-        }
-      ]);
-    };
+  const fetchData = async () => {
+    const participants = await getParticipants(eventId);
+    const arrivedData = participants.filter(p => p.arrivedTime !== null && p.exitedTime === null);
+    const exitedData = participants.filter(p => p.exitedTime !== null);
+    const notArrivedData = participants.filter(p => p.arrivedTime === null && p.exitedTime === null);
+    
+    setData([
+      {
+        name: "נוכחים",
+        value: arrivedData.length,
+        fill: "hsl(var(--chart-1))"
+      },
+      {
+        name: "יצאו",
+        value: exitedData.length,
+        fill: "hsl(var(--chart-2))"
+      },
+      {
+        name: "לא הגיעו",
+        value: notArrivedData.length,
+        fill: "hsl(var(--chart-3))"
+      }
+    ]);
+  };
 
-    fetchData();
+  useEffect(() => {
+    fetchData(); // Initial fetch
+
+    // Set up interval for periodic updates
+    const intervalId = setInterval(fetchData, 10000); // 10 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
   }, [eventId]);
 
   const totalParticipants = React.useMemo(() => {
@@ -73,7 +79,7 @@ export function ParticipantsPieChart({ eventId }: { eventId: number }) {
   }, [data]);
 
   return (
-    <Card className="flex flex-col w-1/2 mr-0 ml-auto">
+    <Card className="flex flex-col w-full md:w-1/2 mr-0 md:ml-auto">
       <CardHeader className="items-center pb-0">
         <CardTitle>סטטוס משתתפים</CardTitle>
         <CardDescription>התפלגות סטטוס משתתפים באירוע</CardDescription>
@@ -81,7 +87,7 @@ export function ParticipantsPieChart({ eventId }: { eventId: number }) {
       <CardContent className="flex-1 pb-4">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square h-[250px] md:h-[250px]"
+          className="mx-auto aspect-square h-[200px] md:h-[250px]"
         >
           <PieChart width={400} height={400}>
             <ChartTooltip
@@ -94,8 +100,8 @@ export function ParticipantsPieChart({ eventId }: { eventId: number }) {
               nameKey="name"
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={80}
+              innerRadius={45}
+              outerRadius={65}
               strokeWidth={1}
               stroke="hsl(var(--background))"
               paddingAngle={2}
@@ -119,14 +125,14 @@ export function ParticipantsPieChart({ eventId }: { eventId: number }) {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
+                          className="fill-foreground text-2xl md:text-3xl font-bold"
                         >
                           {totalParticipants.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
+                          y={(viewBox.cy || 0) + 20}
+                          className="fill-muted-foreground text-sm md:text-base"
                         >
                           משתתפים
                         </tspan>
@@ -139,9 +145,9 @@ export function ParticipantsPieChart({ eventId }: { eventId: number }) {
           </PieChart>
         </ChartContainer>
         
-        <div className="flex justify-center gap-6 mt-4 text-sm">
+        <div className="flex flex-col md:flex-row justify-center gap-3 md:gap-6 mt-4 text-sm">
           {data.map((entry, index) => (
-            <div key={index} className="flex items-center gap-2">
+            <div key={index} className="flex items-center justify-center gap-2">
               <div 
                 className="w-3 h-3 rounded-full" 
                 style={{ backgroundColor: entry.fill }}
