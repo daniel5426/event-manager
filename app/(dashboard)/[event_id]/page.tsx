@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AddParticipantForm } from './add-part-form';
 import { ParticipantsTabs } from './participants-tabs';
 import { ParticipantsPieChart } from './participants-pie-chart';
+import { QRScanner } from './qr-scanner';
 
 interface PageProps {
   params: Promise<{
@@ -45,6 +46,7 @@ export default async function ParticipantsPage({
         <div className="mr-auto flex items-center gap-2 shrink-0">
           <ExportButton eventId={Number(eventId)} />
           <AddParticipantForm eventId={Number(eventId)} />
+          <QRScanner />
         </div>
         <div className="overflow-x-auto">
           <TabsList className="w-fit">

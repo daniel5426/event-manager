@@ -178,7 +178,7 @@ export async function addParticipant(eventId: number, nid: number | null, pn: nu
   return result[0];
 }
 
-export async function registerParticipant(eventId: number, nid: number, pn: number) {
+export async function registerParticipant(eventId: number, nid: number = 0, pn: number = 0) {
   // First, try to find existing participant
   const existingParticipant = await db
     .select()
@@ -187,8 +187,8 @@ export async function registerParticipant(eventId: number, nid: number, pn: numb
       and(
         eq(participants.eventId, eventId),
         or(
-          pn ? eq(participants.pn, pn) : undefined,
-          nid ? eq(participants.nid, nid) : undefined
+          pn !== 0  ? eq(participants.pn, pn) : undefined,
+          nid !== 0 ? eq(participants.nid, nid) : undefined
         )
       )
     )
@@ -332,21 +332,17 @@ export async function deleteParticipantById(id: number) {
   await db.delete(participants).where(eq(participants.id, id));
 }
 
-export async function checkParticipantStatus(eventId: number, pn: number): Promise<{status: 'new' | 'active' | 'exited' | 'not_registered', name: string | null}> {
+export async function checkParticipantStatus(eventId: number, pn: number, nid: number = 0): Promise<{status: 'new' | 'active' | 'exited' | 'not_registered', name: string | null}> {
   const existingParticipant = await db
     .select()
     .from(participants)
     .where(
       and(
         eq(participants.eventId, eventId),
-        eq(participants.pn, pn)
+        nid !== 0 ? eq(participants.nid, nid) : eq(participants.pn, pn)
       )
     )
     .limit(1);
-  const allParticipants = await db.select().from(participants).where(eq(participants.eventId, eventId));
-  console.log(allParticipants);
-  console.log(pn);
-
 
   if (existingParticipant.length === 0) {
     return { status: 'not_registered', name: null };

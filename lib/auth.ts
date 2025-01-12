@@ -10,17 +10,39 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (credentials?.username === 'aqua' && credentials?.password === 'laoma') {
-          return {
-            id: '1',
-            name: 'Admin User',
-          }
+        if (!credentials?.username || !credentials?.password) {
+          return null;
         }
-        return null
+
+        try {
+          const isValid = await validateCredentials(
+            credentials.username as string,
+            credentials.password as string
+          );
+          
+          if (isValid) {
+            return {
+              id: '1',
+              name: credentials.username as string,
+            }
+          }
+          return null;
+        } catch (error) {
+          console.error('Authentication error:', error);
+          return null;
+        }
       }
     })
   ],
   pages: {
     signIn: '/login',
   },
+  session: {
+    strategy: "jwt",
+  },
 });
+
+async function validateCredentials(username: string, password: string): Promise<boolean> {
+  return process.env.ADMIN_USERNAME === username && 
+         process.env.ADMIN_PASSWORD === password;
+}

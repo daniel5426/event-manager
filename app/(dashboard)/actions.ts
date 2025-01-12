@@ -2,11 +2,12 @@
 
 import { deleteEventById, deleteParticipantById, addEvent, registerParticipant, addParticipant, checkParticipantStatus } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import { db, participants } from '@/lib/db';
+import { db, participants, events } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import * as XLSX from 'xlsx';
 import { z } from 'zod';
 import { signIn } from '@/lib/auth';
+import { sendInvitationEmail } from '@/lib/email';
 
 export async function getParticipants(eventId: number) {
   return await db.select().from(participants).where(eq(participants.eventId, eventId));
@@ -97,6 +98,10 @@ async function processParticipantsFile(file: File, eventId: number) {
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const data = XLSX.utils.sheet_to_json(worksheet);
 
+  // Get event details
+  const event = await db.select().from(events).where(eq(events.id, eventId)).limit(1);
+  if (!event.length) throw new Error('Event not found');
+
   // Prepare bulk insert data
   const participantsData = data.map(row => ({
     eventId,
@@ -112,10 +117,27 @@ async function processParticipantsFile(file: File, eventId: number) {
   for (let i = 0; i < participantsData.length; i += chunkSize) {
     const chunk = participantsData.slice(i, i + chunkSize);
     await db.insert(participants).values(chunk);
+
+    // Send invitation emails to participants with email addresses
+    for (const participant of chunk) {
+      if (participant.email && participant.nid && event[0].eventDate) {
+        try {
+          await sendInvitationEmail(
+            participant.email,
+            participant.name || 'אורח/ת יקר/ה',
+            event[0].name,
+            event[0].eventDate,
+            participant.nid
+          );
+        } catch (error) {
+          console.error(`Failed to send email to ${participant.email}:`, error);
+        }
+      }
+    }
   }
 }
 
-export async function registerParticipantAction(eventId: number, nid: number, pn: number) {
+export async function registerParticipantAction(eventId: number, nid: number = 0, pn: number = 0) {
   await registerParticipant(eventId, nid, pn);
   revalidatePath('/');
 }
@@ -138,8 +160,8 @@ export async function updateParticipantArrival(formData: FormData) {
   revalidatePath('/');
 }
 
-export async function checkParticipantStatusAction(eventId: number, pn: number) {
-  return await checkParticipantStatus(eventId, pn);
+export async function checkParticipantStatusAction(eventId: number, pn: number, nid: number = 0) {
+  return await checkParticipantStatus(eventId, pn, nid);
 }
 
 const authFormSchema = z.object({
