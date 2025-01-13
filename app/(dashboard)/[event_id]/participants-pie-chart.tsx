@@ -74,6 +74,7 @@ export function ParticipantsPieChart({ eventId }: { eventId: number }) {
     return () => clearInterval(intervalId);
   }, [eventId]);
 
+  
   const totalParticipants = React.useMemo(() => {
     return data.reduce((acc, curr) => acc + curr.value, 0);
   }, [data]);
