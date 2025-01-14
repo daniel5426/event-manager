@@ -45,6 +45,22 @@ export async function getEvent(eventId: number): Promise<any> {
   return await db.select().from(events).where(eq(events.id, eventId)).limit(1);
 }
 
+export async function getEventById(eventId: number): Promise<any> {
+  const event = await db
+    .select({
+      id: events.id,
+      imageUrl: events.imageUrl,
+      name: events.name,
+      eventDate: sql`to_char(${events.eventDate}, 'YYYY-MM-DD')`
+    })
+    .from(events)
+    .where(eq(events.id, eventId))
+    .limit(1);
+  
+  console.log(event);
+  return event[0];
+}
+
 export async function getEvents(
   search: string,
   offset: number,
@@ -107,7 +123,7 @@ export async function getEvents(
 
 
   let newOffset = moreEvents.length >= 5 ? offset + 5 : null;
-
+  console.log(moreEvents);
   return {
     events: moreEvents,
     newOffset,

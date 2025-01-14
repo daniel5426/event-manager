@@ -1,6 +1,6 @@
 'use server';
 
-import { deleteEventById, deleteParticipantById, addEvent, registerParticipant, addParticipant, checkParticipantStatus } from '@/lib/db';
+import { deleteEventById, deleteParticipantById, addEvent, registerParticipant, addParticipant, checkParticipantStatus, getEventById } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { db, participants, events } from '@/lib/db';
 import { eq } from 'drizzle-orm';
@@ -99,8 +99,9 @@ async function processParticipantsFile(file: File, eventId: number) {
   const data = XLSX.utils.sheet_to_json(worksheet);
 
   // Get event details
-  const event = await db.select().from(events).where(eq(events.id, eventId)).limit(1);
-  if (!event.length) throw new Error('Event not found');
+  const event = await getEventById(eventId);
+  console.log(event);
+  if (!event) throw new Error('Event not found');
 
   // Prepare bulk insert data
   const participantsData = data.map(row => ({
