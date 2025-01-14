@@ -18,6 +18,8 @@ export default function Page() {
   });
 
   useEffect(() => {
+    if (!state) return;
+    
     if (state.status === 'failed') {
       toast.error('Invalid credentials!');
     } else if (state.status === 'invalid_data') {
@@ -26,7 +28,7 @@ export default function Page() {
       setIsSuccessful(true);
       router.push('/'); // Redirect to dashboard after successful login
     }
-  }, [state.status, router]);
+  }, [state?.status, router]);
 
   const handleSubmit = (formData: FormData) => {
     setUsername(formData.get('username') as string);
