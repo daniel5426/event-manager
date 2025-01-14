@@ -34,7 +34,7 @@ export async function sendInvitationEmail(
     <div dir="rtl" style="font-family: Arial, sans-serif;">
       <h2>הזמנה לאירוע</h2>
       <p>שלום ${name},</p>
-      <p>הנך מוזמן/ת לאירוע ${eventName} שיתקיים בתאריך ${eventDate.toLocaleDateString('he-IL')}</p>
+      <p>הנך מוזמן/ת לאירוע ${eventName} שיתקיים בתאריך ${eventDate}</p>
       <p>מצורף קוד QR לכניסה לאירוע:</p>
       <!-- ... other HTML ... -->
       <img src="cid:qr-code" alt="QR Code" style="width: 200px; height: 200px;"/>

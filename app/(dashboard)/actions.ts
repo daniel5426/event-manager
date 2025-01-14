@@ -121,13 +121,13 @@ async function processParticipantsFile(file: File, eventId: number) {
 
     // Send invitation emails to participants with email addresses
     for (const participant of chunk) {
-      if (participant.email && participant.nid && event[0].eventDate) {
+      if (participant.email && participant.nid && event.eventDate) {
         try {
           await sendInvitationEmail(
             participant.email,
             participant.name || 'אורח/ת יקר/ה',
-            event[0].name,
-            event[0].eventDate,
+            event.name,
+            event.eventDate,
             participant.nid
           );
         } catch (error) {
